@@ -1,0 +1,316 @@
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+#container-fluid {
+    height: calc(100vh - 54px);
+}
+
+h1 {
+    font-size: 50px !important;
+    font-weight: bold !important;
+}
+
+h1, h5 {
+    color: #ffffff;
+    text-align: center;
+    margin: 50px;
+    padding-top: 50px;
+   
+}
+
+/* Add a black background color to the top navigation */
+.topnav {
+    background-color: #f2f2f2;
+    overflow: hidden;
+}
+
+    /* Style the links inside the navigation bar */
+    .topnav a {
+        float: left;
+        display: block;
+        color: black;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        font-size: 17px;
+    }
+
+        /* Change the color of links on hover */
+        .topnav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        /* Add an active class to highlight the current page */
+        .topnav a.active {
+            background-color: #04AA6D;
+            color: white;
+        }
+
+    /* Hide the link that should open and close the topnav on small screens */
+    .topnav .icon {
+        display: none;
+    }
+
+/* When the screen is less than 600 pixels wide, hide all links, except for the first one ("Home"). Show the link that contains should open and close the topnav (.icon) */
+@media screen and (max-width: 600px) {
+    .topnav a:not(:first-child) {
+        display: none;
+    }
+
+    .topnav a.icon {
+        float: right;
+        display: block;
+    }
+}
+
+/* The "responsive" class is added to the topnav with JavaScript when the user clicks on the icon. This class makes the topnav look good on small screens (display the links vertically instead of horizontally) */
+@media screen and (max-width: 600px) {
+    .topnav.responsive {
+        position: relative;
+    }
+
+        .topnav.responsive a.icon {
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+
+        .topnav.responsive a {
+            float: none;
+            display: block;
+            text-align: left;
+        }
+}
+
+
+    
+
+
+/* JAVASCRIPT CALENDAR TUT CSS */
+
+
+
+
+/*
+button {
+    width: 75px;
+    cursor: pointer;
+    box-shadow: 0px 0px 2px gray;
+    border: none;
+    outline: none;
+    padding: 5px;
+    border-radius: 5px;
+    color: white;
+}
+    */
+
+#header {
+    padding: 10px;
+    
+    font-size: 26px;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: space-between;
+}
+
+
+    #header button {
+        background-color: #92a1d1;
+    }
+    
+
+#calendar_container {
+    margin: auto;
+    max-width: 1800px;
+    /*border: 5px solid red;*/
+}
+
+#weekdays {
+    width: 100%;
+    display: flex;
+    color: #247BA0;
+    /* border: 5px solid blue; */
+    text-align: center;
+}
+
+    #weekdays div {
+        width: 14.2%;
+        padding: 10px;
+        margin: 0px;
+        /* border: 5px solid green; */
+    }
+
+#calendar {
+    width: 100%;
+    margin: auto;
+    display: flex;
+    flex-wrap: wrap;
+    /* border: 5px solid yellow; */
+}
+
+.day {
+    width: 14.2%;
+    padding: 10px;
+    height: 200px;
+    cursor: pointer;
+    box-sizing: border-box;
+    background-color: white;
+    margin: 0px;
+    box-shadow: 0px 0px 3px #CBD4C2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid grey;
+}
+
+/* my code */
+
+@media screen and (max-width: 600px) {
+    .day {
+        height: 100px;
+        width: 14.2%;
+        margin: 0px;
+    }
+
+    #weekdays div {
+        width: 14.2%;
+        margin: 0px;
+    }
+}
+/* end of my code */
+
+    .day:hover {
+        background-color: #e8faed;
+    }
+
+    .day + #currentDay {
+        background-color: #c8d8e4;
+    }
+
+.event {
+    font-size: 10px;
+    padding: 3px;
+    background-color: #58bae4;
+    color: white;
+    border-radius: 5px;
+    max-height: 55px;
+    overflow: hidden;
+}
+
+.padding {
+    cursor: default !important;
+    background-color: #FFFCFF !important;
+    box-shadow: none !important;
+}
+
+#newEventModal, #deleteEventModal {
+    display: none;
+    z-index: 20;
+    padding: 25px;
+    background-color: #e8f4fa;
+    box-shadow: 0px 0px 3px black;
+    border-radius: 5px;
+    width: 350px;
+    top: 100px;
+    left: calc(50% - 175px);
+    position: absolute;
+    font-family: sans-serif;
+}
+
+/* mine */
+.event-input {
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 25px;
+    border-radius: 3px;
+    outline: none;
+    border: none;
+    box-shadow: 0px 0px 3px gray;
+}
+    .event-input.error {
+        border: 2px solid red; 
+    }
+/* end of mine */
+
+/*
+#event-title-input {
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 25px;
+    border-radius: 3px;
+    outline: none;
+    border: none;
+    box-shadow: 0px 0px 3px gray;
+}
+
+    #event-title-input.error {
+        border: 2px solid red;
+    }
+*/
+
+#cancelButton, #deleteButton {
+    background-color: #d36c6c;
+}
+
+#saveButton, #closeButton {
+    background-color: #92a1d1;
+}
+
+#eventText {
+    font-size: 14px;
+}
+
+#modalBackDrop {
+    display: none;
+    top: 0px;
+    left: 0px;
+    z-index: 10;
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    background-color: rgba(0,0,0,0.8);
+}
+
+/* tab buttons */
+
+/* Style the tab */
+.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+  }
+  
+  /* Style the buttons that are used to open the tab content */
+  .tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+  }
+  
+  /* Change background color of buttons on hover */
+  .tab button:hover {
+    background-color: #ddd;
+  }
+  
+  /* Create an active/current tablink class */
+  .tab button.active {
+    background-color: #ccc;
+  }
+  
+  /* Style the tab content */
+  .tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+  }
+

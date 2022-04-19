@@ -1,0 +1,178 @@
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/*sign in modal */
+#js-sign-in-modal {
+    display: none;
+    z-index: 20;
+    padding: 25px;
+    background-color: #c8d8e4;
+    box-shadow: 0px 0px 3px black;
+    border-radius: 5px;
+    width: 350px;
+    top: 100px;
+    left: calc(50% - 175px);
+    position: absolute;
+    font-family: sans-serif;
+}
+
+#js-login-error-message {
+    display: block;
+    color: red;
+}
+
+#home_image {
+    width: 80%;
+    height: auto;
+    display: block;
+    margin: auto;
+    background: transparent;
+    margin-top: 10%;
+    margin-bottom: 10%;
+}
+
+#logo_image {
+    width: 5%;
+    height: auto;
+    background: transparent;
+}
+
+h1 {
+    font-size: 60px !important;
+    font-weight: bold !important;
+    
+}
+
+h1, h5 {
+    color: #ffffff;
+    text-align: center;
+    margin: 50px;
+    padding-top: 50px;
+
+    
+   
+}
+
+.hyperlink {
+    text-align: center;
+}
+
+
+#nav_image {
+    width: 20%;
+    height: auto;
+}
+
+/* Add a background color and some padding around the form */
+#sign_up_form {
+    border-radius: 5px;
+    
+}
+
+/* Style inputs with type="text" and "email", select elements and textareas */
+input[type=text], input[type=email], input[type=password] {
+    background-color: #f2f2f2;
+    width: 100%; /* Full width */
+    padding: 12px; /* Some padding */
+    border: 1px solid #ccc; /* Gray border */
+    border-radius: 4px; /* Rounded borders */
+    box-sizing: border-box; /* Make sure that padding and width stays in place */
+    margin-top: 6px; /* Add a top margin */
+    margin-bottom: 16px; /* Bottom margin */
+    resize: vertical /* Allow the user to vertically resize the textarea (not horizontally) */
+}
+
+    /* input[type=text].error, input[type=email].error {
+
+    } */
+
+input[type=text]:focus {
+    background-color: #f2f2f2;
+}
+
+/* Style the submit button with a specific background color etc */
+input[type=submit] {
+    background-color: #2b6777;
+    color: white;
+    margin-top: 6px;
+    margin-bottom: 24px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+    /* When moving the mouse over the submit button, add a darker green color */
+    input[type=submit]:hover {
+        background-color: #3A8397;
+    }
+
+
+/* Add a black background color to the top navigation */
+.topnav {
+    background-color: #f2f2f2;
+    overflow: hidden;
+}
+
+    /* Style the links inside the navigation bar */
+    .topnav a {
+        float: left;
+        display: block;
+        color: black;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        font-size: 17px;
+    }
+
+        /* Change the color of links on hover */
+        .topnav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        /* Add an active class to highlight the current page */
+        .topnav a.active {
+            background-color: #04AA6D;
+            color: white;
+        }
+
+    /* Hide the link that should open and close the topnav on small screens */
+    .topnav .icon {
+        display: none;
+    }
+
+/* When the screen is less than 600 pixels wide, hide all links, except for the first one ("Home"). Show the link that contains should open and close the topnav (.icon) */
+@media screen and (max-width: 600px) {
+    .topnav a:not(:first-child) {
+        display: none;
+    }
+
+    .topnav a.icon {
+        float: right;
+        display: block;
+    }
+}
+
+/* The "responsive" class is added to the topnav with JavaScript when the user clicks on the icon. This class makes the topnav look good on small screens (display the links vertically instead of horizontally) */
+@media screen and (max-width: 600px) {
+    .topnav.responsive {
+        position: relative;
+    }
+
+        .topnav.responsive a.icon {
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+
+        .topnav.responsive a {
+            float: none;
+            display: block;
+            text-align: left;
+        }
+}
+
