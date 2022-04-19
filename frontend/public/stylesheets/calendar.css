@@ -232,18 +232,25 @@ button {
     box-shadow: none !important;
 }
 
-#newEventModal, #deleteEventModal, #editEventModal {
+#deleteEventModal, #editEventModal, #tabModal {
     display: none;
     z-index: 20;
     padding: 25px;
     background-color: #e8f4fa;
     box-shadow: 0px 0px 3px black;
     border-radius: 5px;
-    width: 350px;
+    width: 400px;
     top: 100px;
     left: calc(50% - 175px);
     position: absolute;
     font-family: sans-serif;
+}
+
+#js-new-event-title, #js-new-reservation-title {
+    font-size: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    text-align: center;
 }
 
 #expandedEventsModal {
@@ -276,28 +283,15 @@ button {
     }
 /* end of mine */
 
-/*
-#event-title-input {
-    padding: 10px;
-    width: 100%;
-    box-sizing: border-box;
-    margin-bottom: 25px;
-    border-radius: 3px;
-    outline: none;
-    border: none;
-    box-shadow: 0px 0px 3px gray;
+#cancelButton {
+    background-color: #d8caca;
 }
 
-    #event-title-input.error {
-        border: 2px solid red;
-    }
-*/
-
-#cancelButton, #deleteButton {
-    background-color: #d36c6c;
+#deleteButton {
+    background-color: #e92121;
 }
 
-#saveButton, #closeButton {
+#saveButton, #closeButton, #createButton {
     background-color: #92a1d1;
 }
 
@@ -316,3 +310,55 @@ button {
     background-color: rgba(0,0,0,0.8);
 }
 
+/* Style the tab */
+.tab {
+    overflow: hidden;
+    
+    background-color: #e8f4fa;
+  }
+  
+.tablinks {
+    width: 50%;
+}
+
+  /* Style the buttons that are used to open the tab content */
+  .tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+  }
+  
+  /* Change background color of buttons on hover */
+  .tab button:hover {
+    background-color: #ddd;
+  }
+  
+  /* Create an active/current tablink class */
+  .tab button.active {
+    background-color: #ccc;
+  }
+  
+  /* Style the tab content */
+  .tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border-top: none;
+  }
+
+#tabModal {
+    display: none;
+}
+
+.tabcontent {
+    animation: fadeEffect 0.2s; /* Fading effect takes 1 second */
+  }
+  
+  /* Go from zero to full opacity */
+  @keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }

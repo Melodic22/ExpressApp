@@ -12,7 +12,7 @@ const app = express();
 const db = new sqlite3.Database('./db.sqlite3');
 
 // db.run("DROP TABLE accounts");
-// db.run("DROP TABLE events");
+//db.run("DROP TABLE events");
 
 //db.run("INSERT INTO events (user_id, location_id, title, date, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?)", [2, 3, 'test', '17/04/2022', '16:00:00', '17:00:00']);
 // db.run("INSERT INTO events (user_id, location_id, title, date, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?)", [2, 4, 'newtest', '18/04/2022', '14:00:00', '14:15:00']);
@@ -79,6 +79,10 @@ app.get('/calendar', (req, res) => {
             //get all events for current user
             db.get("SELECT user_id FROM accounts WHERE email = ?", [req.session.email], (error, results, fields) => {
                 let user_id = results.user_id;
+
+                //for use elsewhere in the program when accessing the db
+                req.session.user_id = user_id;
+                
                 console.log('userid: '+user_id);
                 db.all("SELECT * FROM events WHERE user_id = ?", [user_id], (error, results, fields) => {
                     console.log(results);
@@ -136,19 +140,7 @@ app.get('/', (req, res) => {
 app.get('/logout', (req, res) => {
     req.session.loggedin = false;
     res.redirect('/');
-})
-
-//sign up link from sign in page
-// app.get('/signup_prompt', (req, res) => {
-//     res.redirect('/');
-// });
-
-//sign in link from sign up page
-// app.post('/login', (req, res) => {
-//     res.render('login', {
-//         message : ''
-//     });
-// });
+});
 
 //redirect from invalid login details
 app.get('/login', (req, res) => {
@@ -232,24 +224,57 @@ app.post('/calendar/create-event', (req, res) => {
     //take form data from create event
     let title = req.body.title;
     let description = req.body.description;
+    //temp loc
     let location = req.body.location;
     let participants = req.body.participants;
     let sTime = req.body.start;
     let fTime = req.body.end;
+    let eventDate = req.body.eventdate;
     
+    //not registering title from form
     console.log(title);
     console.log(description);
+    //temp loc
     console.log(location);
     console.log(participants);
     console.log(sTime);
     console.log(fTime);
+    console.log(req.session.user_id);
     
-    //TODO
 
-    // db.run("INSERT INTO events (event_id, user_id, location_id, participants, title, description, date, start_time, end_time)" +
-    //         "VALUES ()");
+    db.run("INSERT INTO events (user_id, location_id, participants, title, description, date, start_time, end_time)" +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [req.session.user_id, location, participants, title, description, eventDate, sTime, fTime]);
 
+    res.redirect('/calendar');        
 });
+
+app.post('/calendar/edit-event', (req, res) => {
+    console.log('calendar/edit-event POST called');
+
+    //take form data from create event
+    let title = req.body.title;
+    let description = req.body.description;
+    //temp loc
+    let location = req.body.location;
+    let participants = req.body.participants;
+    let sTime = req.body.start;
+    let fTime = req.body.end;
+    let event_id = req.body.eventid;
+    
+    //not registering title from form
+    console.log(title);
+    console.log(description);
+    //temp loc
+    console.log(location);
+    console.log(participants);
+    console.log(sTime);
+    console.log(fTime);
+    console.log(req.session.user_id);
+
+    db.run("UPDATE events SET location_id=? , participants=?, title=?, description=?, start_time=?, end_time=? WHERE event_id=?", [location, participants, title, description, sTime, fTime, event_id]);
+
+    res.redirect('/calendar');
+})
 
 
 // Port Number

@@ -4,9 +4,11 @@ let events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('e
 
 const calendar = document.getElementById('calendar');
 const newEventModal = document.getElementById('newEventModal');
+const newReservationModal = document.getElementById('newReservationModal');
 const editEventModal = document.getElementById('editEventModal');
 const deleteEventModal = document.getElementById('deleteEventModal');
 const expandedEventsModal = document.getElementById('expandedEventsModal');
+const tabModal = document.getElementById('tabModal');
 const backDrop = document.getElementById('modalBackDrop');
 const eventTitleInput = document.getElementById('event-title-input');
 const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -148,7 +150,7 @@ function load() {
                     //temp display
                     const eventDiv = document.createElement('div');
                     eventDiv.classList.add('event');
-                    eventDiv.innerText = event.title;
+                    eventDiv.innerText = `${event.title}: ${event.start_time} to ${event.end_time}`;
                     daySquare.appendChild(eventDiv);
 
                     //eventDiv.addEventListener('click', () => openExpandedEventModal(event));
@@ -213,33 +215,55 @@ function openExpandedEventsModal(selectedDate) {
 
         //TEMP (this uses local storage)
         openModal(selectedDate);
+        //ACTUAL
+        openNewEventModal(selectedDate);
     }
 
+}
+
+function openNewEventModal(date) {
+
+    //newEventModal.style.display = 'block';
+    
+    tabModal.style.display = 'block';
+
+    backDrop.style.display = 'block';
+    document.getElementById("defaultOpen").click();
+
+    document.getElementById('js-new-event-title').innerText = `New event for ${date}`;
+    document.getElementById('js-new-reservation-title').innerText = `New reservation for ${date}`;
+
+    document.getElementById('event-date-input').value = date;
+
+
+    document.getElementById('createButton').addEventListener('click', closeModal);
 }
 
 function openEditEventModal(event) {
 
     expandedEventsModal.style.display = 'none';
     editEventModal.style.display = 'block';
-    const newEventTitle = document.getElementById('js-new-event-title').innerText = `Edit event for ${event.date}`;
+    document.getElementById('js-edit-event-title').innerText = `Edit event for ${event.date}`;
 
     //hidden value for the database to reference to update record
     document.getElementById('event-id-edit').value = event.event_id;
     //set the new values for updated record
-    document.getElementById('event-title-edit').placeholder = event.title;
-    document.getElementById('event-desc-edit').placeholder = event.description;
-    document.getElementById('event-loc-edit').placeholder = event.location_id;
-    document.getElementById('event-participants-edit').placeholder = event.participants;
+    document.getElementById('event-title-edit').value = event.title;
+    event.description ? document.getElementById('event-desc-edit').value = event.description : '';
+    document.getElementById('event-loc-edit').value = event.location_id;
+    event.participants ? document.getElementById('event-participants-edit').value = event.participants : '';
     document.getElementById('event-start-time-edit').value = event.start_time;
     document.getElementById('event-finish-time-edit').value = event.end_time;
 
 }
 
 function closeModal() {
-    eventTitleInput.classList.remove('error');
+    //eventTitleInput.classList.remove('error');
     newEventModal.style.display = 'none';
+    newReservationModal.style.display = 'none';
     deleteEventModal.style.display = 'none';
     expandedEventsModal.style.display = 'none';
+    tabModal.style.display = 'none';
     backDrop.style.display = 'none';
     eventTitleInput.value = '';
     clicked = null;
@@ -308,6 +332,29 @@ function myFunction() {
     }
 }
 
+/* tab links */
+function openForm(evt, formName) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+  
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+  
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+  
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(formName).style.display = "block";
+    evt.currentTarget.className += " active";
+
+
+  }
 
 initEventListeners();
 load();

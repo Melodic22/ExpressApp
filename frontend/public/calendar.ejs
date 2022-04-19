@@ -84,32 +84,83 @@
                         <div id="calendar"></div>
                     </div>
 
-                    <div id="newEventModal">
-                        <h2 id="js-new-event-title">New Event</h2>
 
-                        <form action="/calendar/create-event" method="POST">
-                            <input type="text" id="event-title-input" class="event-input" name="title" placeholder="Title" required/>
-                            <input type="text" id="event-desc-input" class="event-input" name="description" placeholder="Description"/>
-                            <input type="text" id="event-loc-input" class="event-input" name="location" placeholder="Location" required/>
-                            <input type="email" id="event-participants-input" class="event-input" name="participants" placeholder="Participants (UEA Email)"/>
-                            <input type="time" id="event-start-time-input" class="event-input" name="start" placeholder="Start Time" required/>
-                            <input type="time" id="event-finish-time-input" class="event-input" name="end" placeholder="Finish Time" required/>
-                            
-                            <!-- <label for="event-reminder-checkbox">Email Reminder?</label> -->
-                            <!-- <input type="checkbox" id="js-event-reminder-checkbox" class="event-checkbox"/> -->
-                            
+                    
+                    <!-- Tab content -->
 
-                            <input id="saveButton" type="submit" value="Create"></input>
-                            <button id="cancelButton">Cancel</button>
-                        </form>
+                    <div id="tabModal">
 
+                        <!-- Tab links -->
+                        <div class="tab">
+                            <button class="tablinks" onclick="openForm(event, 'newEventModal')"  id="defaultOpen">Event</button>
+                            <button class="tablinks" onclick="openForm(event, 'newReservationModal')">Reservation</button>
+                        </div>
+
+                        <div id="newEventModal" class="tabcontent">
+                            <h4 id="js-new-event-title">New Event</h4>
+    
+                            <form action="/calendar/create-event" method="POST">
+                                
+                                
+                                <input type="hidden" id="event-date-input" name="eventdate"/>
+                                <!--change id name once I have finalised calendar.js (it currently uses event-title-input)-->
+                                <input type="text" id="event-title-in" class="event-input" name="title" placeholder="Title" required/> 
+                                <input type="text" id="event-desc-input" class="event-input" name="description" placeholder="Description"/>
+                                <input type="text" id="event-loc-input" class="event-input" name="location" placeholder="Location" required/>
+                                <input type="email" id="event-participants-input" class="event-input" name="participants" placeholder="Participants (UEA Email)"/>
+                                <label for="start">Start</label><br>
+                                <input type="time" id="event-start-time-input" class="event-input" name="start" placeholder="Start Time" step="900" required/>
+                                <label for="end">End</label><br>
+                                <input type="time" id="event-finish-time-input" class="event-input" name="end" placeholder="Finish Time"  step="900" required/>
+                                
+                                
+    
+                                <!-- <label for="event-reminder-checkbox">Email Reminder?</label> -->
+                                <!-- <input type="checkbox" id="js-event-reminder-checkbox" class="event-checkbox"/> -->
+                                
+    
+                                <input id="createButton" type="submit" value="Create"></input>
+                                <button id="cancelButton" type="button">Cancel</button>
+                            </form>
+    
+                        </div>
+
+                
+                        
+                        <div id="newReservationModal" class="tabcontent">
+                            <h4 id="js-new-reservation-title">New Reservation</h4>
+    
+                            <form action="/calendar/create-reservation" method="POST">
+                                
+                                
+                                <input type="hidden" id="res-date-input" name="eventdate"/>
+                                <!--change id name once I have finalised calendar.js (it currently uses event-title-input)-->
+                                <!-- <input type="text" id="res-title-input" class="event-input" name="title" placeholder="Title" required/>  -->
+                                <label for="start">Start</label><br>
+                                <input type="time" id="res-start-time-input" class="event-input" name="start" placeholder="Start Time" required/>
+                                <label for="end">End</label><br>
+                                <input type="time" id="res-finish-time-input" class="event-input" name="end" placeholder="Finish Time" required/>
+                                
+                                
+    
+                                <!-- <label for="event-reminder-checkbox">Email Reminder?</label> -->
+                                <!-- <input type="checkbox" id="js-event-reminder-checkbox" class="event-checkbox"/> -->
+                                
+    
+                                <input id="createButton" type="submit" value="Create"></input>
+                                <button id="cancelButton" type="button">Cancel</button>
+                            </form>
+    
+                        </div>
                     </div>
 
+                    
+
                     <div id="editEventModal">
-                        <h2 id="js-new-event-title">New Event</h2>
+                        <h2 id="js-edit-event-title">New Event</h2>
 
                         <form action="/calendar/edit-event" method="POST">
-                            <input type="hidden" id="event-id-edit" name="event-id">
+                            <input type="hidden" id="event-id-edit" name="eventid">
                             <input type="text" id="event-title-edit" class="event-input" name="title" placeholder="Title" required/>
                             <input type="text" id="event-desc-edit" class="event-input" name="description" placeholder="Description"/>
                             <input type="text" id="event-loc-edit" class="event-input" name="location" placeholder="Location" required/>
@@ -122,6 +173,7 @@
                             
 
                             <input id="editButton" type="submit" value="Confirm Edit"></input>
+                            <button id="deleteButton">Delete</button>
                             <button id="cancelButton">Cancel</button>
                         </form>
 
@@ -138,7 +190,8 @@
 
                         <p id="eventText"></p>
 
-                        <button id="deleteButton">Delete</button>
+                        <!-- did have id of "deleteButton"-->
+                        <button >Delete</button>
                         <button id="cancelButton2">Cancel</button>
 
                     </div>
