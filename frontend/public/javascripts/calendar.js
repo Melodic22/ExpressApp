@@ -10,7 +10,8 @@ const deleteEventModal = document.getElementById('deleteEventModal');
 const expandedEventsModal = document.getElementById('expandedEventsModal');
 const tabModal = document.getElementById('tabModal');
 const backDrop = document.getElementById('modalBackDrop');
-const eventTitleInput = document.getElementById('event-title-input');
+//changed from event-title-input temporarily
+const eventTitleInput = document.getElementById('event-title-in');
 const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -265,7 +266,7 @@ function closeModal() {
     expandedEventsModal.style.display = 'none';
     tabModal.style.display = 'none';
     backDrop.style.display = 'none';
-    eventTitleInput.value = '';
+    //eventTitleInput.value = '';
     clicked = null;
     console.log('close modal called');
     load();
@@ -356,5 +357,8 @@ function openForm(evt, formName) {
 
   }
 
+
+  //temp
+  let personalEvents = [];
 initEventListeners();
 load();
