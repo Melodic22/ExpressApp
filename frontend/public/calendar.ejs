@@ -37,10 +37,13 @@
 
 
         <!--create variable passed from backend so is accessible from calendar.js-->
-        <!-- <script>
-            let personalEvents = <%- JSON.stringify(results) %>;
+        <script>
+            let personalEvents = <%- JSON.stringify(bookedEvents) %>;
             console.log(personalEvents);
-        </script> -->
+
+            let bookedSlots = <%- JSON.stringify(bookedSlots) %>;
+            console.log(bookedSlots);
+        </script>
 
       
 
@@ -126,7 +129,7 @@
                             <form action="/calendar/create-reservation" method="POST">
                                 
                                 
-                                <input type="hidden" id="res-date-input" name="eventdate"/>
+                                <input type="hidden" id="slot-date-input" name="slotdate"/>
                                 <!--change id name once I have finalised calendar.js (it currently uses event-title-input)-->
                                 <!-- <input type="text" id="res-title-input" class="event-input" name="title" placeholder="Title" required/>  -->
                                 <label for="start">Start</label><br>
@@ -138,6 +141,8 @@
     
                                 <!-- <label for="event-reminder-checkbox">Email Reminder?</label> -->
                                 <!-- <input type="checkbox" id="js-event-reminder-checkbox" class="event-checkbox"/> -->
+
+                                
                                 
     
                                 <input id="createButton" type="submit" value="Create"></input>

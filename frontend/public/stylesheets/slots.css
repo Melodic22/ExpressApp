@@ -140,67 +140,7 @@ button {
     /*border: 5px solid red;*/
 }
 
-#weekdays {
-    width: 100%;
-    display: flex;
-    color: #247BA0;
-    /* border: 5px solid blue; */
-    text-align: center;
-}
 
-    #weekdays div {
-        width: 14.2%;
-        padding: 10px;
-        margin: 0px;
-        /* border: 5px solid green; */
-    }
-
-#calendar {
-    width: 100%;
-    margin: auto;
-    display: flex;
-    flex-wrap: wrap;
-    /* border: 5px solid yellow; */
-}
-
-.day {
-    width: 14.2%;
-    padding: 10px;
-    height: 200px;
-    cursor: pointer;
-    box-sizing: border-box;
-    background-color: white;
-    margin: 0px;
-    box-shadow: 0px 0px 3px #CBD4C2;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    border: 1px solid grey;
-}
-
-/* my code */
-
-@media screen and (max-width: 600px) {
-    .day {
-        height: 100px;
-        width: 14.2%;
-        margin: 0px;
-    }
-
-    #weekdays div {
-        width: 14.2%;
-        margin: 0px;
-    }
-}
-/* end of my code */
-
-    .day:hover {
-        background-color: #e8faed;
-    }
-
-    .day + #currentDay {
-        background-color: #c8d8e4;
-    }
 
 .event, .slot {
     font-size: 10px;
@@ -317,55 +257,4 @@ button {
     background-color: rgba(0,0,0,0.8);
 }
 
-/* Style the tab */
-.tab {
-    overflow: hidden;
-    
-    background-color: #e8f4fa;
-  }
-  
-.tablinks {
-    width: 50%;
-}
 
-  /* Style the buttons that are used to open the tab content */
-  .tab button {
-    background-color: inherit;
-    float: left;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    padding: 14px 16px;
-    transition: 0.3s;
-  }
-  
-  /* Change background color of buttons on hover */
-  .tab button:hover {
-    background-color: #ddd;
-  }
-  
-  /* Create an active/current tablink class */
-  .tab button.active {
-    background-color: #ccc;
-  }
-  
-  /* Style the tab content */
-  .tabcontent {
-    display: none;
-    padding: 6px 12px;
-    border-top: none;
-  }
-
-#tabModal {
-    display: none;
-}
-
-.tabcontent {
-    animation: fadeEffect 0.2s; /* Fading effect takes 1 second */
-  }
-  
-  /* Go from zero to full opacity */
-  @keyframes fadeEffect {
-    from {opacity: 0;}
-    to {opacity: 1;}
-  }

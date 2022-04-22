@@ -107,38 +107,36 @@ app.get('/calendar', (req, res) => {
                                 LEFT OUTER JOIN Addresses as a \
                                     ON l.address_id = a.address_id \
                                 WHERE b.host_id = ?", [req.session.user_id], (error, results) => {
-                                    console.log(JSON.stringify(results));
-                                    console.log(results);
+                                    let bookedEvents = results;
+                                    console.log(bookedEvents);
+
+                                    //select all reserved slots     //may need to also get email of user?
+                                    db.all("SELECT * \
+                                            FROM BookingSlots as bs \
+                                                INNER JOIN Staff as s \
+                                                    ON bs.staff_id = s.staff_id \
+                                                INNER JOIN TimeInfo as ti \
+                                                    ON bs.time_id = ti.time_id \
+                                                WHERE s.user_id = ?", [req.session.user_id], (error, results) => {
+                                                    let bookedSlots = results;
+                                                    console.log(bookedSlots)
+
+                                                    //pass retrieved data back to calendar
+                                                    res.render('calendar', {
+                                                        username : req.session.username,
+                                                        bookedEvents : bookedEvents,
+                                                        bookedSlots : bookedSlots
+                                                    });
+                                                })
                                     
-                                    res.render('calendar', {
-                                        username : req.session.username,
-                                        results : results
-                                    });
+
                                     
                                 }
-                             )
+                    )
                 })
             })
-                
-                // db.all("SELECT * FROM events WHERE user_id = ?", [user_id], (error, results, fields) => {
-                //     console.log(results);
-                //     // res.send(results);
-
-                //     res.render('calendar', {
-                //         username : req.session.username,
-                //         results : results
-                //     })
-
-
-                // });
-           // },
-            
-            //pass each event to frontend
-            //display event on appropriate day
 
             //TODO: potentially also display outlook events on the same calendar? (toggle option)
-
-        
 
     } else {
         res.redirect('/');
@@ -436,13 +434,6 @@ app.post('/calendar/create-event', (req, res) => {
         
     })
 
-
-    
-    //db.run("INSERT INTO EventInfo (title, description, location_id)")
-
-    // db.run("INSERT INTO events (user_id, location_id, participants, title, description, date, start_time, end_time)" +
-    //         "VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [req.session.user_id, location, participants, title, description, eventDate, sTime, fTime]);
-
     res.redirect('/calendar');        
 });
 
@@ -472,8 +463,97 @@ app.post('/calendar/edit-event', (req, res) => {
     db.run("UPDATE events SET location_id=? , participants=?, title=?, description=?, start_time=?, end_time=? WHERE event_id=?", [location, participants, title, description, sTime, fTime, event_id]);
 
     res.redirect('/calendar');
-})
+});
 
+app.post('/calendar/create-reservation', (req, res) => {
+    console.log('/calendar/create-reservation POST called');
+
+    //TODO: Check if user acount is a staff member or student
+    db.get("SELECT staff_id FROM Staff WHERE user_id=?", [req.session.user_id], function(error, results) {
+        if (results) {
+
+            //if student:
+            let sTime = req.body.start;
+            let fTime = req.body.end;
+            let slotDate = req.body.slotdate;
+            let staff_id = results.staff_id;
+
+            console.log(sTime);
+            console.log(fTime);
+            console.log(slotDate);
+            console.log(`staff_id: ${staff_id}`);
+            console.log(`user_id: ${req.session.user_id}`);
+
+            db.run("INSERT INTO TimeInfo (date, time_start, time_finish) VALUES (?, ?, ?)", [slotDate, sTime, fTime], function(error) {
+                let time_id = this.lastID;
+                console.log(`time_id ${time_id}`);
+
+                db.run("INSERT INTO BookingSlots (staff_id, time_id) VALUES (?, ?)", [staff_id, time_id]);
+
+
+                res.redirect('/calendar');  
+            })
+        } else {
+            res.redirect('/calendar');
+            //TODO:
+
+            // current user is not a staff member and therefore cannot create reserved timeslots
+            // res.render('calendar', {
+            //     not_staff_error_message : 'Sorry, you cannot create reserved timeslots as you are a student.',
+            //     showReservationMenu : true
+            // })
+        }
+    })  
+
+});
+
+app.get('/slots', (req, res) => {
+
+    //select all reserved slots     //may need to also get email of user?
+    db.all("SELECT COUNT(staff_id) AS count FROM Staff", (error, results) => {
+        console.log(`results ${JSON.stringify(results)}`);
+        console.log(results[0]);      
+        let staffCount = Object.values(results[0]);
+        console.log(staffCount);
+
+        let slots = {};
+
+        for (i=1; i<=staffCount; i++) {
+            //console.log(i);
+            db.all("SELECT * \
+            FROM BookingSlots as bs \
+                INNER JOIN Staff as s \
+                    ON bs.staff_id = s.staff_id \
+                INNER JOIN TimeInfo as ti \
+                    ON bs.time_id = ti.time_id \
+                WHERE s.staff_id=?", 
+                [i], (error, results) => {
+                    console.log(JSON.stringify(results));
+                    let availableSlots = results;
+                    //console.log(JSON.stringify(availableSlots));
+                    console.log(`i: ${i}`);
+                    slots[i] = results;
+    
+                    console.log(`slots ${JSON.stringify(slots)}`);
+                    //pass retrieved data back to calendar
+                    // res.render('slots', {
+                    //     username : req.session.username,
+                    //     availableSlots : availableSlots
+                    // });
+            })
+           
+        }
+        console.log(slots);
+    })
+
+    // res.render('slots', {
+    //     username : req.session.username,
+    //     availableSlots : 'test'
+    // });
+
+    
+
+});
 
 // Port Number
 const PORT = process.env.PORT ||5000;

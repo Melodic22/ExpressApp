@@ -67,6 +67,11 @@ function load() {
         smallScreenSettings();
     }
 
+    // //show reservation menu on page render if not_staff_member error occured 
+    // if (showReservationMenu) {
+    //     openForm(event, 'newReservationModal')
+    // }
+
 
 
 
@@ -151,10 +156,20 @@ function load() {
                     //temp display
                     const eventDiv = document.createElement('div');
                     eventDiv.classList.add('event');
-                    eventDiv.innerText = `${event.title}: ${event.start_time} to ${event.end_time}`;
+                    eventDiv.innerText = `${event.title}: ${event.time_start} to ${event.time_finish}`;
                     daySquare.appendChild(eventDiv);
 
                     //eventDiv.addEventListener('click', () => openExpandedEventModal(event));
+                }
+            });
+
+            //if there is any reserved slots in the database
+            bookedSlots.forEach(function(slot) {
+                if (slot.date === dayString) {
+                    const eventDiv = document.createElement('div');
+                    eventDiv.classList.add('slot');
+                    eventDiv.innerText = `Reserved Slot: ${slot.time_start} to ${slot.time_finish}`;
+                    daySquare.appendChild(eventDiv);
                 }
             })
 
@@ -193,9 +208,10 @@ function openExpandedEventsModal(selectedDate) {
             
             
             //construct eventDiv text depending on optional values
-            let eventSummary = `${event.title}: ${event.start_time}-${event.end_time}`;
+            let eventSummary = `${event.title}: ${event.time_start}-${event.time_finish}`;
             if (event.description) {    eventSummary = eventSummary.concat(`\nDescription: ${event.description}`);     }
-            if (event.participants) {   eventSummary = eventSummary.concat(`\nParticipants: ${event.participants}`);    }
+            //TODO: change participants_id to find the name of the participant and display whether they've accepted
+            if (event.participant_id) {   eventSummary = eventSummary.concat(`\nParticipants: ${event.participants_id}`);    }
             eventDiv.innerText = eventSummary;
             expandedEventsModal.append(eventDiv);
             
@@ -235,6 +251,7 @@ function openNewEventModal(date) {
     document.getElementById('js-new-reservation-title').innerText = `New reservation for ${date}`;
 
     document.getElementById('event-date-input').value = date;
+    document.getElementById('slot-date-input').value = date;
 
 
     document.getElementById('createButton').addEventListener('click', closeModal);
@@ -253,8 +270,8 @@ function openEditEventModal(event) {
     event.description ? document.getElementById('event-desc-edit').value = event.description : '';
     document.getElementById('event-loc-edit').value = event.location_id;
     event.participants ? document.getElementById('event-participants-edit').value = event.participants : '';
-    document.getElementById('event-start-time-edit').value = event.start_time;
-    document.getElementById('event-finish-time-edit').value = event.end_time;
+    document.getElementById('event-start-time-edit').value = event.time_start;
+    document.getElementById('event-finish-time-edit').value = event.time_finish;
 
 }
 
@@ -358,7 +375,5 @@ function openForm(evt, formName) {
   }
 
 
-  //temp
-  let personalEvents = [];
 initEventListeners();
 load();
