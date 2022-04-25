@@ -509,49 +509,74 @@ app.post('/calendar/create-reservation', (req, res) => {
 
 app.get('/slots', (req, res) => {
 
-    //select all reserved slots     //may need to also get email of user?
-    db.all("SELECT COUNT(staff_id) AS count FROM Staff", (error, results) => {
-        console.log(`results ${JSON.stringify(results)}`);
-        console.log(results[0]);      
-        let staffCount = Object.values(results[0]);
-        console.log(staffCount);
+    // //select all reserved slots     //may need to also get email of user?
+    // db.all("SELECT COUNT(staff_id) AS count FROM Staff", (error, results) => {
+    //     console.log(`results ${JSON.stringify(results)}`);
+    //     console.log(results[0]);      
+    //     let staffCount = Object.values(results[0]);
+    //     console.log(staffCount);
 
-        let slots = {};
+    //     let slots = {};
 
-        for (i=1; i<=staffCount; i++) {
-            //console.log(i);
-            db.all("SELECT * \
-            FROM BookingSlots as bs \
-                INNER JOIN Staff as s \
-                    ON bs.staff_id = s.staff_id \
-                INNER JOIN TimeInfo as ti \
-                    ON bs.time_id = ti.time_id \
-                WHERE s.staff_id=?", 
-                [i], (error, results) => {
-                    console.log(JSON.stringify(results));
-                    let availableSlots = results;
-                    //console.log(JSON.stringify(availableSlots));
-                    console.log(`i: ${i}`);
-                    slots[i] = results;
+    //     for (i=1; i<=staffCount; i++) {
+    //         //console.log(i);
+    //         db.all("SELECT * \
+    //         FROM BookingSlots as bs \
+    //             INNER JOIN Staff as s \
+    //                 ON bs.staff_id = s.staff_id \
+    //             INNER JOIN TimeInfo as ti \
+    //                 ON bs.time_id = ti.time_id \
+    //             WHERE s.staff_id=?", 
+    //             [i], (error, results) => {
+    //                 console.log(JSON.stringify(results));
+    //                 let availableSlots = results;
+    //                 //console.log(JSON.stringify(availableSlots));
+    //                 console.log(`i: ${i}`);
+    //                 slots[i] = results;
     
-                    console.log(`slots ${JSON.stringify(slots)}`);
-                    //pass retrieved data back to calendar
-                    // res.render('slots', {
-                    //     username : req.session.username,
-                    //     availableSlots : availableSlots
-                    // });
-            })
+    //                 console.log(`slots ${JSON.stringify(slots)}`);
+    //                 //pass retrieved data back to calendar
+    //                 // res.render('slots', {
+    //                 //     username : req.session.username,
+    //                 //     availableSlots : availableSlots
+    //                 // });
+    //         })
            
-        }
-        console.log(slots);
-    })
+    //     }
+    //     console.log(slots);
+    // })
 
     // res.render('slots', {
     //     username : req.session.username,
     //     availableSlots : 'test'
     // });
-
     
+
+
+    console.log('GET /slots called');
+
+    db.all("SELECT slot_id, s.staff_id, ti.time_id, date, time_start, time_finish, s.user_id, firstname, lastname, email \
+            FROM BookingSlots as bs \
+            INNER JOIN Staff as s \
+                ON bs.staff_id = s.staff_id \
+            INNER JOIN TimeInfo as ti \
+                ON bs.time_id = ti.time_id\
+            INNER JOIN Users as u\
+                ON s.user_id = u.user_id\
+            ORDER BY s.staff_id ASC;", (error, results) => {
+
+                        
+                //console.log(results)
+
+
+                //pass retrieved data back to calendar
+                res.render('slots', {
+                    username : req.session.username,
+                    slots : results
+                });
+        })
+
+
 
 });
 

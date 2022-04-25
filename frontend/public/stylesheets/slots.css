@@ -230,6 +230,12 @@ button {
     }
 /* end of mine */
 
+.slotButton {
+    background-color: #bb1592;
+    color: white;
+    height: 50px;
+}
+
 #cancelButton {
     background-color: #d8caca;
 }

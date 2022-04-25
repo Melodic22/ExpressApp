@@ -2,7 +2,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <link type="text/css" href="stylesheets/calendar.css" rel="stylesheet">
+        <link type="text/css" href="stylesheets/slots.css" rel="stylesheet">
         
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,7 +17,8 @@
     <body>
         
         <div class="topnav" id="myTopnav">
-            <a href="calendar" class="active">Personal Calendar</a>
+            <a href="calendar">Personal Calendar</a>
+            <a href="slots" class="active">Book a Slot</a>
             <a href="outlook">Outlook Calendar</a>
             <a href="outlooks">My Outlook Calendar</a>
             <a href="logout" id="top-right-nav-2">Sign out</a>
@@ -36,14 +37,14 @@
        
 
 
-        <!--create variable passed from backend so is accessible from calendar.js-->
+        <!--create variable passed from backend so is accessible from slots.js-->
         <script>
-            let availableSlots = <%- JSON.stringify(availableSlots) %>;
-            console.log(availableSlots);
+            let slots = <%- JSON.stringify(slots) %>;
         </script>
 
+        
         <div class="table-responsive">
-            <table class="table">
+            <table class="table table-hover">
                 <thead>
                     <tr>
                       <th scope="col">Staff Member</th>
@@ -51,8 +52,8 @@
                     </tr>
                   </thead>
                   
-                  <tbody>
-                    <tr>
+                  <tbody id="js-table-body">
+                    <!-- <tr>
                       <th scope="row">1</th>
                       <td>Mark</td>
 
@@ -65,7 +66,7 @@
                     <tr>
                       <th scope="row">3</th>
                       <td>@twitter</td>
-                    </tr>
+                    </tr> -->
                   </tbody>
             </table>
         </div>
@@ -76,7 +77,7 @@
 
         </div>
         
-        <script src="javascripts/calendar.js"></script>
+        <script src="javascripts/slots.js"></script>
 
     </body>
 
