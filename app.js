@@ -507,51 +507,7 @@ app.post('/calendar/create-reservation', (req, res) => {
 
 });
 
-app.get('/slots', (req, res) => {
-
-    // //select all reserved slots     //may need to also get email of user?
-    // db.all("SELECT COUNT(staff_id) AS count FROM Staff", (error, results) => {
-    //     console.log(`results ${JSON.stringify(results)}`);
-    //     console.log(results[0]);      
-    //     let staffCount = Object.values(results[0]);
-    //     console.log(staffCount);
-
-    //     let slots = {};
-
-    //     for (i=1; i<=staffCount; i++) {
-    //         //console.log(i);
-    //         db.all("SELECT * \
-    //         FROM BookingSlots as bs \
-    //             INNER JOIN Staff as s \
-    //                 ON bs.staff_id = s.staff_id \
-    //             INNER JOIN TimeInfo as ti \
-    //                 ON bs.time_id = ti.time_id \
-    //             WHERE s.staff_id=?", 
-    //             [i], (error, results) => {
-    //                 console.log(JSON.stringify(results));
-    //                 let availableSlots = results;
-    //                 //console.log(JSON.stringify(availableSlots));
-    //                 console.log(`i: ${i}`);
-    //                 slots[i] = results;
-    
-    //                 console.log(`slots ${JSON.stringify(slots)}`);
-    //                 //pass retrieved data back to calendar
-    //                 // res.render('slots', {
-    //                 //     username : req.session.username,
-    //                 //     availableSlots : availableSlots
-    //                 // });
-    //         })
-           
-    //     }
-    //     console.log(slots);
-    // })
-
-    // res.render('slots', {
-    //     username : req.session.username,
-    //     availableSlots : 'test'
-    // });
-    
-
+app.get('/slots', (req, res) => {  
 
     console.log('GET /slots called');
 
@@ -565,21 +521,38 @@ app.get('/slots', (req, res) => {
                 ON s.user_id = u.user_id\
             ORDER BY s.staff_id ASC;", (error, results) => {
 
-                        
-                //console.log(results)
-
-
                 //pass retrieved data back to calendar
                 res.render('slots', {
                     username : req.session.username,
+                    email : req.session.email,
                     slots : results
                 });
         })
 
-
-
 });
 
+//when a reserved slot is confirmed by a user
+app.post('/slots/confirm-slot', (req, res) => {
+    console.log('POST /slots/confirm-slot called');
+
+    //send confirmation email to student
+    const sendMail = require('./frontend/public/javascripts/email.js')
+
+    email = `Dear ${req.session.username}, <br>\
+            This is a confirmation email for your meeting with ${req.body.firstname} ${req.body.lastname} \
+            on ${req.body.date} \
+            from ${req.body.time_start} to ${req.body.time_finish} <br>\
+            Your meeting has been added to your calendar on the MyCalendarChum website, \
+            and will also be added to your Outlook Calendar once I've implemented it`;
+    sendMail.sendMail(email);
+
+    //has to remove slot booking from Bookingslots
+    //add it to BookedEvents
+    //send confirmation emails to both users
+    //add the event to each of their personal calendars (should be automatic)
+    //add the event to each of their outlook calendars
+
+});
 // Port Number
 const PORT = process.env.PORT ||5000;
 
