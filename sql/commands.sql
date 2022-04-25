@@ -25,11 +25,24 @@ SELECT * FROM BookingSlots as bs
     INNER JOIN Staff as s 
         ON bs.staff_id = s.staff_id 
     INNER JOIN TimeInfo as ti 
-        ON bs.time_id = ti.time_id 
-    WHERE s.staff_id = 1;
+        ON bs.time_id = ti.time_id
+    INNER JOIN Users as u
+        ON s.user_id = u.user_id
+    ORDER BY staff_id ASC;
 
-DELETE FROM Students WHERE user_id=6;
-DELETE FROM Users WHERE user_id=6;
+    --slot_id, staff_id, time_id, user_id, date, time_start, time_finish, firstname, lastname, email
+
+SELECT slot_id, s.staff_id, ti.time_id, date, time_start, time_finish, s.user_id, firstname, lastname, email FROM BookingSlots as bs 
+    INNER JOIN Staff as s 
+        ON bs.staff_id = s.staff_id 
+    INNER JOIN TimeInfo as ti 
+        ON bs.time_id = ti.time_id
+    INNER JOIN Users as u
+        ON s.user_id = u.user_id
+    ORDER BY s.staff_id ASC;
+
+-- DELETE FROM Students WHERE user_id=6;
+-- DELETE FROM Users WHERE user_id=6;
 
 
 
