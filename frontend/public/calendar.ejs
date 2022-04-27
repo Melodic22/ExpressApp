@@ -102,19 +102,36 @@
                                 <!--change id name once I have finalised calendar.js (it currently uses event-title-input)-->
                                 <input type="text" id="event-title-in" class="event-input" name="title" placeholder="Title" required/> 
                                 <input type="text" id="event-desc-input" class="event-input" name="description" placeholder="Description"/>
-                                <input type="text" id="event-loc-input" class="event-input" name="location" placeholder="Location" required/>
+                                <!-- <input type="text" id="event-loc-input" class="event-input" name="location" placeholder="Location" required/> -->
                                 <input type="email" id="event-participants-input" class="event-input" name="participants" placeholder="Participants (UEA Email)"/>
                                 <label for="start">Start</label><br>
                                 <!-- temp had to get rid of step=900 and required-->
                                 <input type="time" id="event-start-time-input" class="event-input" name="s" placeholder="Start Time" />
                                 <label for="end">End</label><br>
                                 <input type="time" id="event-finish-time-input" class="event-input" name="e" placeholder="Finish Time"  />
-                                
-                                
-    
-                                <!-- <label for="event-reminder-checkbox">Email Reminder?</label> -->
-                                <!-- <input type="checkbox" id="js-event-reminder-checkbox" class="event-checkbox"/> -->
-                                
+
+                                <label for="location">Location</label>
+                                <select name="location" id="js-ev-location" class="reservation-input" onchange="checkIfCustomLocation('ev')" >
+                                    <option value="Online">Online</option>
+                                    <option value="UEA Campus">UEA Campus</option>
+                                    <option value="Other (Please specify)">Other (Please specify)</option>
+                                </select>
+
+                                <div id="js-ev-extra-uea-location-input" style="display:none;">
+                                    <input type="text" id="ev-building-input" class="event-input" name="ev_uea_location_building" placeholder="Building" required disabled>
+                                    <input type="text" id="ev-room-input" class="event-input" name="ev_uea_location_room" placeholder="Room Floor and Number (e.g. 2.37)" required disabled>
+                                </div>
+
+                                <div id="js-ev-extra-other-location-input" style="display:none;">
+                                    <input type="text" id="ev-loc-name-in" class="event-input" name="ev_other_location_name" placeholder="Location Name" required disabled>
+                                    <input type="text" id="ev-loc-add-1-in" class="event-input" name="location_line_1" placeholder="Address Line 1" required disabled>
+                                    <input type="text" id="ev-loc-add-2-in" class="event-input" name="location_line_2" placeholder="Address Line 2" disabled>
+                                    <input type="text" id="ev-loc-add-3-in" class="event-input" name="location_line_3" placeholder="Address Line 3" disabled>
+                                    <input type="text" id="ev-loc-city-in" class="event-input" name="location_city" placeholder="City" required disabled>
+                                    <input type="text" id="ev-loc-county-in" class="event-input" name="location_county" placeholder="County" disabled>
+                                    <input type="text" id="ev-loc-postcode-in" class="event-input" name="location_postcode" placeholder="Postcode" required disabled>
+                                    <input type="text" id="ev-loc-country-in" class="event-input" name="location_country" placeholder="Country" disabled>
+                                </div>                              
     
                                 <input id="createButton" type="submit" value="Create"></input>
                                 <button id="cancelButton" type="button">Cancel</button>
@@ -137,9 +154,33 @@
                                 <input type="time" id="res-start-time-input" class="event-input" name="start" placeholder="Start Time" required/>
                                 <label for="end">End</label><br>
                                 <input type="time" id="res-finish-time-input" class="event-input" name="end" placeholder="Finish Time" required/>
+
+                                
+
+                                <label for="location">Location</label>
+                                <select name="location" id="js-res-location" class="reservation-input" onchange="checkIfCustomLocation('res')" >
+                                    <option value="Online">Online</option>
+                                    <option value="UEA Campus">UEA Campus</option>
+                                    <option value="Other (Please specify)">Other (Please specify)</option>
+                                </select>
+
+                                <div id="js-res-extra-uea-location-input" style="display:none;">
+                                    <input type="text" id="res-building-input" class="event-input" name="res_uea_location_building" placeholder="Building" required disabled>
+                                    <input type="text" id="res-room-input" class="event-input" name="res_uea_location_room" placeholder="Room Floor and Number (e.g. 2.37)" required disabled>
+                                </div>
+
+                                <div id="js-res-extra-other-location-input" style="display:none;">
+                                    <input type="text" id="res-loc-name-in" class="event-input" name="res_other_location_name" placeholder="Location Name" required disabled>
+                                    <input type="text" id="res-loc-add-1-in" class="event-input" name="location_line_1" placeholder="Address Line 1" required disabled>
+                                    <input type="text" id="res-loc-add-2-in" class="event-input" name="location_line_2" placeholder="Address Line 2" disabled>
+                                    <input type="text" id="res-loc-add-3-in" class="event-input" name="location_line_3" placeholder="Address Line 3" disabled>
+                                    <input type="text" id="res-loc-city-in" class="event-input" name="location_city" placeholder="City" required disabled>
+                                    <input type="text" id="res-loc-county-in" class="event-input" name="location_county" placeholder="County" disabled>
+                                    <input type="text" id="res-loc-postcode-in" class="event-input" name="location_postcode" placeholder="Postcode" required disabled>
+                                    <input type="text" id="res-loc-country-in" class="event-input" name="location_country" placeholder="Country" disabled>
+                                </div>    
                                 
                                 
-    
                                 <!-- <label for="event-reminder-checkbox">Email Reminder?</label> -->
                                 <!-- <input type="checkbox" id="js-event-reminder-checkbox" class="event-checkbox"/> -->
 

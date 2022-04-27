@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer');
 
 
 
-function sendMail(email) {
+function sendMail(email, recipient) {
 
     const transport = nodemailer.createTransport({
         service: 'Gmail',
@@ -17,7 +17,7 @@ function sendMail(email) {
 
     transport.sendMail({
         from: 'mycalendarchum@gmail.com',
-        to: 'mattreid22@btopenworld.com',
+        to: recipient,
         subject: 'Meeting Confirmation',
         html: email
     }).catch(error => console.log(error));

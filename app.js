@@ -5,6 +5,7 @@ const session = require('express-session');
 const path = require('path');
 const sqlite3 = require('sqlite3');
 const { response } = require('express');
+const dbTools = require("./frontend/public/javascripts/dbTools");
 
 // Creating express object
 const app = express();
@@ -70,77 +71,97 @@ app.set('views', __dirname + '/frontend/public');
 //specify the view engine
 app.set('view engine', 'ejs');
 
-app.get('/calendar', (req, res) => {
+app.get('/calendar', async function (req, res) {
     console.log('/calendar called');
     if (req.session.loggedin) {
-
-        
-        //TODO:
-            //create personal events database table
+    
             console.log('current username: ' + req.session.username);
-            
+                 
+            let user_id = await dbTools.getUserIdByEmail(req.session.email);
+            console.log(`\n\nUser_id in /calendar is ${user_id.user_id}\n\n`);
+
+            //for use elsewhere in the program when accessing the db (not ac globally accessible - need to fix)
+            req.session.user_id = user_id.user_id;
+
+            let bookedEvents = await dbTools.getBookedEventsByUserId(req.session.user_id);
+            console.log(bookedEvents);
+            let bookedSlots = await dbTools.getBookedSlotsByUserId(req.session.user_id);
+            console.log(bookedSlots);
+
+            res.render('calendar', {
+                username : req.session.username,
+                bookedEvents : bookedEvents,
+                bookedSlots : bookedSlots
+            });
+
+        } else {
+            res.redirect('/');
+        }
+            //temp
+
             //get current user_id
-            db.get("SELECT user_id FROM Users WHERE email = ?", [req.session.email], (error, results) => {
-                let user_id = results.user_id;
+            // db.get("SELECT user_id FROM Users WHERE email = ?", [req.session.email], (error, results) => {
+            //     let user_id = results.user_id;
                 
                 //for use elsewhere in the program when accessing the db (not ac globally accessible - need to fix)
-                req.session.user_id = user_id;
+                // req.session.user_id = user_id.user_id;
 
 
                 
-                console.log('userid in /calendar: '+ req.session.user_id);
+                // console.log('userid in /calendar: '+ req.session.user_id);
                 
-                //select all confirmed events for current user
-                db.serialize(() => {
-                    db.all("SELECT * \
-                            FROM BookedEvents as b \
-                                INNER JOIN TimeInfo as t \
-                                    ON b.time_id = t.time_id \
-                                INNER JOIN EventInfo as e \
-                                    ON e.event_id = b.event_id \
-                                LEFT OUTER JOIN Participations as p \
-                                    ON b.event_id = p.event_id \
-                                LEFT OUTER JOIN ParticipationType as pt \
-                                    ON pt.participation_type_id = p.participation_type_id \
-                                LEFT OUTER JOIN Locations as l \
-                                    ON e.location_id = l.location_id \
-                                LEFT OUTER JOIN Addresses as a \
-                                    ON l.address_id = a.address_id \
-                                WHERE b.host_id = ?", [req.session.user_id], (error, results) => {
-                                    let bookedEvents = results;
-                                    console.log(bookedEvents);
+                // //select all confirmed events for current user
+                // db.serialize( async () => {
+                //     // db.all("SELECT * \
+                //     //         FROM BookedEvents as b \
+                //     //             INNER JOIN TimeInfo as t \
+                //     //                 ON b.time_id = t.time_id \
+                //     //             INNER JOIN EventInfo as e \
+                //     //                 ON e.event_id = b.event_id \
+                //     //             LEFT OUTER JOIN Participations as p \
+                //     //                 ON b.event_id = p.event_id \
+                //     //             LEFT OUTER JOIN ParticipationType as pt \
+                //     //                 ON pt.participation_type_id = p.participation_type_id \
+                //     //             LEFT OUTER JOIN Locations as l \
+                //     //                 ON e.location_id = l.location_id \
+                //     //             LEFT OUTER JOIN Addresses as a \
+                //     //                 ON l.address_id = a.address_id \
+                //     //             WHERE b.host_id = ?", [req.session.user_id], (error, results) => {
+                        
+                //                     //let bookedEvents = results;
+                //                     console.log(bookedEvents);
 
-                                    //select all reserved slots     //may need to also get email of user?
-                                    db.all("SELECT * \
-                                            FROM BookingSlots as bs \
-                                                INNER JOIN Staff as s \
-                                                    ON bs.staff_id = s.staff_id \
-                                                INNER JOIN TimeInfo as ti \
-                                                    ON bs.time_id = ti.time_id \
-                                                WHERE s.user_id = ?", [req.session.user_id], (error, results) => {
-                                                    let bookedSlots = results;
-                                                    console.log(bookedSlots)
+                //                     //select all reserved slots     //may need to also get email of user?
+                //                     db.all("SELECT * \
+                //                             FROM BookingSlots as bs \
+                //                                 INNER JOIN Staff as s \
+                //                                     ON bs.staff_id = s.staff_id \
+                //                                 INNER JOIN TimeInfo as ti \
+                //                                     ON bs.time_id = ti.time_id \
+                //                                 WHERE s.user_id = ?", [req.session.user_id], (error, results) => {
+                //                                     let bookedSlots = results;
+                //                                     console.log(bookedSlots)
 
-                                                    //pass retrieved data back to calendar
-                                                    res.render('calendar', {
-                                                        username : req.session.username,
-                                                        bookedEvents : bookedEvents,
-                                                        bookedSlots : bookedSlots
-                                                    });
-                                                })
+                //                                     //pass retrieved data back to calendar
+                //                                     res.render('calendar', {
+                //                                         username : req.session.username,
+                //                                         bookedEvents : bookedEvents,
+                //                                         bookedSlots : bookedSlots
+                //                                     });
+                //                                 })
                                     
 
                                     
-                                }
-                    )
-                })
-            })
+                //                 //}
+                //     //)
+                // })
+            //})
 
             //TODO: potentially also display outlook events on the same calendar? (toggle option)
 
-    } else {
-        res.redirect('/');
-    }
+    // } else {
+    //     res.redirect('/');
+    // }
     
 });
 
@@ -178,7 +199,7 @@ app.get('/login', (req, res) => {
 });
 
 //login button
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
 
     console.log('post/login called');
     let email = req.body.email;
@@ -190,65 +211,46 @@ app.post('/login', (req, res) => {
         // res.sendFile(path.join(__dirname, 'frontend/public/calendar.html'));
         //db.get("SELECT * FROM Users WHERE email = ? AND password = ?", [email, password], (error, results, fields) => {
 
-        //check for staff user
-        db.get("SELECT * \
-                FROM Users AS u \
-                INNER JOIN Staff AS s \
-                ON u.user_id = s.user_id \
-                WHERE u.email = ? AND u.password = ?", [email, password], (error, results, fields) => {
-            if (error) {
-                console.log(error);
+        //new code
+        let staffAccount = await dbTools.getStaffByEmailPassword(email, password);
+
+        //user is a staff member
+        if (staffAccount) {
+            console.log('staff member found');
+        
+            req.session.type = 'staff';
+            req.session.loggedin = true;
+            req.session.user_id = staffAccount.user_id;
+            req.session.username = staffAccount.firstname;
+            req.session.lastname = staffAccount.lastname;
+            req.session.email = staffAccount.email;
+
+            //redirect
+            res.redirect('/calendar');
+        } else {
+            let studentAccount = await dbTools.getStudentByEmailPassword(email, password);
+
+            //user is a student member
+            if (studentAccount) {
+                console.log('student member found');
+
+                req.session.type = 'student';
+                req.session.loggedin = true;
+                req.session.user_id = studentAccount.user_id;
+                req.session.username = studentAccount.firstname;
+                req.session.lastname = studentAccount.lastname;
+                req.session.email = studentAccount.email;
+
+                //redirect
+                res.redirect('/calendar');
             } else {
-                
-                if (results) {
-                    console.log('staff member found');
-                    //staff user
-                    req.session.type = 'staff';
-                    //valid user credentials
-                    console.log(`results: ${JSON.stringify(results)}`);
-                    req.session.loggedin = true;
-                    req.session.user_id = results.user_id;
-                    req.session.username = results.firstname;
-                    req.session.email = results.email;
-
-                    //redirect
-                    res.redirect('/calendar');
-
-                } else {
-                    //check for student user
-                    db.get("SELECT * \
-                            FROM Users AS u \
-                            INNER JOIN Students AS s \
-                            ON u.user_id = s.user_id \
-                            WHERE u.email = ? AND u.password = ?", [email, password], (error, results, fields) => {
-
-                        if (error) {
-                            console.log(error);
-                        } 
-                        else if (results) {
-                            console.log('student member found');
-                            //student user
-                            req.session.type = 'student';
-                            //valid user credentials
-                            console.log(`results: ${JSON.stringify(results)}`);
-                            req.session.loggedin = true;
-                            req.session.user_id = results.user_id;
-                            req.session.username = results.firstname;
-                            req.session.email = results.email;
-
-                            //redirect
-                            res.redirect('/calendar');
-                        } else {
-                            //invalid user
-                            res.render('login', {
-                                message : 'Email and/or password incorrect. Please try again.'
-                            });
-                        }
-                    });
-                }
-
+                //invalid user
+                res.render('login', {
+                    message : 'Email and/or password incorrect. Please try again.'
+                });
             }
-        });        
+        }
+
     } else {
         //no valid credentials were inputted
         console.log('default render');
@@ -257,10 +259,82 @@ app.post('/login', (req, res) => {
         });
         res.end();     
     };
+
+
+
+        //end of new code
+
+        //check for staff user
+    //     db.get("SELECT * \
+    //             FROM Users AS u \
+    //             INNER JOIN Staff AS s \
+    //             ON u.user_id = s.user_id \
+    //             WHERE u.email = ? AND u.password = ?", [email, password], (error, results, fields) => {
+    //         if (error) {
+    //             console.log(error);
+    //         } else {
+                
+    //             if (results) {
+    //                 console.log('staff member found');
+    //                 //staff user
+    //                 req.session.type = 'staff';
+    //                 //valid user credentials
+    //                 console.log(`results: ${JSON.stringify(results)}`);
+    //                 req.session.loggedin = true;
+    //                 req.session.user_id = results.user_id;
+    //                 req.session.username = results.firstname;
+    //                 req.session.email = results.email;
+
+    //                 //redirect
+    //                 res.redirect('/calendar');
+
+    //             } else {
+    //                 //check for student user
+    //                 db.get("SELECT * \
+    //                         FROM Users AS u \
+    //                         INNER JOIN Students AS s \
+    //                         ON u.user_id = s.user_id \
+    //                         WHERE u.email = ? AND u.password = ?", [email, password], (error, results, fields) => {
+
+    //                     if (error) {
+    //                         console.log(error);
+    //                     } 
+    //                     else if (results) {
+    //                         console.log('student member found');
+    //                         //student user
+    //                         req.session.type = 'student';
+    //                         //valid user credentials
+    //                         console.log(`results: ${JSON.stringify(results)}`);
+    //                         req.session.loggedin = true;
+    //                         req.session.user_id = results.user_id;
+    //                         req.session.username = results.firstname;
+    //                         req.session.email = results.email;
+
+    //                         //redirect
+    //                         res.redirect('/calendar');
+    //                     } else {
+    //                         //invalid user
+    //                         res.render('login', {
+    //                             message : 'Email and/or password incorrect. Please try again.'
+    //                         });
+    //                     }
+    //                 });
+    //             }
+
+    //         }
+    //     });        
+    // } else {
+    //     //no valid credentials were inputted
+    //     console.log('default render');
+    //     res.render('login', {
+    //         message : ''
+    //     });
+    //     res.end();     
+    // };
 });
 
 //create account route
-app.post('/signup', (req, res) => {
+app.post('/signup', async (req, res) => {
     //res.send('sign up page');
 
     //TODO: verify inputs
@@ -271,172 +345,128 @@ app.post('/signup', (req, res) => {
     let type = req.body.account_type;
     console.log(`type of account ${type}`);
 
-    //create entry in database
-    db.serialize(() => {
-        db.run("INSERT INTO Users (firstname, lastname, email, password) \
-                VALUES (?, ?, ?, ?)", [fname, lname, email, password], function (err) {
+    //new
 
-            if (err) {
-                console.log(err);
-            }
-            //let user_id = db.last_insert_rowid;
-            let user_id = this.lastID;
-            console.log(`user_id ${user_id}`);
-            //req.session.user_id = user_id; //ALSO ADD THIS INTO /LOGIN ? THEN CAN REMOVE FROM CALENDAR
+    //check if account with email already exists
+    let userExists = await dbTools.getUserIdByEmail(email);
+    if (!userExists) {
 
+        let newUser = await dbTools.createUser(fname, lname, email, password);
+        if (newUser.error) {
+            console.log(error);
+        } else {
+            let user_id = newUser.lastID;
+    
             if (type === 'staff') {
-                db.run("INSERT INTO Staff (user_id) VALUES (?)", [user_id]);
+                await dbTools.createStaff(user_id);
             } else {
-                db.run("INSERT INTO Students (user_id) VALUES (?)", [user_id]);
+                await dbTools.createStudent(user_id);
             }
-        });
-
+        };
+    
         req.session.loggedin = true;
         req.session.username = fname;
-        res.redirect('/calendar');                //UNCOMMENT
-    });
-    
+        req.session.lastname = lname;
+        req.session.email = email;
+        res.redirect('/calendar');   
+    } else {    //account already exists
+        //TEMP: NEEDS TO DISPLAY ERROR MESSAGE SAYING EMAIL ALREADY IN USE
+        console.log('account already exists');
+        res.redirect('/');
+    }   
 
 });
 
 //create personal event
-app.post('/calendar/create-event', (req, res) => {
+app.post('/calendar/create-event', async (req, res) => {
     console.log('calendar/create-event POST called');
 
     //take form data from create event
     let title = req.body.title;
     let description = req.body.description;
-    //temp loc
     let location = req.body.location;
     let participants = req.body.participants;
     let sTime = req.body.s;
     let fTime = req.body.e;
     let eventDate = req.body.eventdate;
     
-    //not registering title from form
     console.log(title);
     console.log(description);
-    //temp loc
     console.log(location);
     console.log(participants);
     console.log(sTime);
     console.log(fTime);
     console.log(req.session.user_id);
-    
-    db.serialize(() => {
-        //for testing purposes, need to add checkbox for "online" so that is formatted correctly
 
-        //create online event
-        if (location === 'online') {
-            console.log('location is online');
-            // db.run("INSERT INTO Locations (name) VALUES (?)", location, function(error) {
-            //     let location_id = this.lastID;
-            //     console.log(`location_id ${location_id}`);
+    if (location === 'Online') {
 
-                //1 is the location_id for 'online'
-                db.run("INSERT INTO EventInfo (title, description, location_id) VALUES (?, ?, ?)", [title, description, 1], function(error) {
-                    let event_id = this.lastID;
-                    console.log(`event_id ${event_id}`);
-        
-                    db.run("INSERT INTO TimeInfo (date, time_start, time_finish) VALUES (?, ?, ?)", [eventDate, sTime, fTime], function(error) {
-                        let time_id = this.lastID;
-                        console.log(`time_id ${time_id}`);
-            
-                        db.run("INSERT INTO BookedEvents (host_id, time_id, event_id) VALUES (?, ?, ?)", [req.session.user_id, time_id, event_id], function(error) {
+        console.log(`location is ${location}`);
+        var newEvent = await dbTools.createEvent(title, description, 1, eventDate, sTime, fTime, req.session.user_id);
 
-                            if (participants) {   //assume just 1 participant for now, later will need to manipulate input data
-                                //db.run("INSERT INTO ParticipationType (participation_type_name) VALUES (?)", 'invited', function(error, results) {
-                                    //let participation_type_id = this.lastID;
-                                    //console.log(`participation_type_id ${participation_type_id}`);
+    } else if (location === 'UEA Campus') {
 
-                                    db.get("SELECT user_id FROM Users WHERE email=?", [participants], function(error, results) {
-                                        let participant_id = results.user_id;
-                                        console.log(`participant_id ${participant_id}`);
-                                        db.run("INSERT INTO Participations (event_id, participant_id, participation_type_id) VALUES (?, ?, ?)", [event_id, participant_id, 2]);
-                                    })
-                                //})   
-                            } else {    //if no participants
-                                db.run("INSERT INTO Participations (event_id, participant_id, participation_type_id) VALUES (?, ?, ?)", [event_id, null, 1]);
-                            }
+        console.log(`location is ${location}`);
+        var locBuilding = req.body.ev_uea_location_building;
+        var locRoom = req.body.ev_uea_location_room;
 
+        console.log(locBuilding);
+        console.log(locRoom);
 
+        const locationExists = await dbTools.getLocationByUEARoom(location, locBuilding, locRoom);
+        if (locationExists) {
+            let location_id = locationExists.location_id;
+            var newEvent = await dbTools.createEvent(title, description, location_id, eventDate, sTime, fTime, req.session.user_id);
 
-                            
-                        });
-                    });
-                    
-                });
-                
-            //})
-        } else if (location === 'UEA') {
-            //2 is the location_id for 'UEA'
-            db.run("INSERT INTO EventInfo (title, description, location_id) VALUES (?, ?, ?)", [title, description, 2], function(error) {
-                let event_id = this.lastID;
-                console.log(`event_id ${event_id}`);
-    
-                db.run("INSERT INTO TimeInfo (date, time_start, time_finish) VALUES (?, ?, ?)", [eventDate, sTime, fTime], function(error) {
-                    let time_id = this.lastID;
-                    console.log(`time_id ${time_id}`);
-        
-                    db.run("INSERT INTO BookedEvents (host_id, time_id, event_id) VALUES (?, ?, ?)", [req.session.user_id, time_id, event_id], function(error) {
-
-                        if (participants) {   //assume just 1 participant for now, later will need to manipulate input data
-                            //db.run("INSERT INTO ParticipationType (participation_type_name) VALUES (?)", 'invited', function(error, results) {
-                                //let participation_type_id = this.lastID;
-                                //console.log(`participation_type_id ${participation_type_id}`);
-
-                                db.get("SELECT user_id FROM Users WHERE email=?", [participants], function(error, results) {
-                                    let participant_id = results.user_id;
-                                    console.log(`participant_id ${participant_id}`);
-                                    db.run("INSERT INTO Participations (event_id, participant_id, participation_type_id) VALUES (?, ?, ?)", [event_id, participant_id, 2]);
-                                })
-                            //})   
-                        } else {    //if no participants
-                            db.run("INSERT INTO Participations (event_id, participant_id, participation_type_id) VALUES (?, ?, ?)", [event_id, null, 1]);
-                        }
-
-
-
-                        
-                    });
-                });
-                
-            });
-        } else {    //location is new location TODO: allow a user to input a new address
-
-            //create offline event with address
-            console.log('location is not online');
-            db.run("INSERT INTO Addresses (line_1, line_2, line_3, city, county, postcode, country) VALUES (?, ?, ?, ?, ?, ?, ?)", [line_1, line_2, line_3, city, county, postcode, country], function(error) {
-                let address_id = this.lastID;
-                console.log(`address_id ${address_id}`);
-
-                db.run("INSERT INTO Locations (name, address_id) VALUES (?, ?)", [location, address_id], function(error) {
-                    let location_id = this.lastID;
-                    console.log(`loc_id ${loc_id}`);
-        
-                    db.run("INSERT INTO EventInfo (title, description, location_id) VALUES (?, ?, ?)", [title, description, location_id], function(error) {
-                        let event_id = this.lastID;
-                        console.log(`event_id ${event_id}`);
-            
-                        db.run("INSERT INTO TimeInfo (date, time_start, time_finish) VALUES (?, ?, ?)", [eventDate, sTime, fTime], function(error) {
-                            let time_id = this.lastID;
-                            console.log(`time_id ${time_id}`);
-                
-                            db.run("INSERT INTO BookedEvents (user_id, time_id, event_id) VALUES (?, ?, ?)", [req.session.user_id, time_id, event_id]);
-                        });
-                        
-                    });
-                    
-                })
-            })
-
+        } else {    //create new location if doesn't already exist
+            const UEALocation = await dbTools.createLocation('UEA Campus', locBuilding, locRoom, 1);
+            var newEvent = await dbTools.createEvent(title, description, UEALocation.lastID, eventDate, sTime, fTime, req.session.user_id);
         }
-        
-    })
 
-    res.redirect('/calendar');        
+    } else {    //for "Other" input
+
+        console.log(`location is ${location}`);
+        var locName = req.body.ev_other_location_name;
+        var locLine1 = req.body.location_line_1;
+        var locLine2 = req.body.location_line_2;
+        var locLine3 = req.body.location_line_3;
+        var locCity = req.body.location_city;
+        var locCounty = req.body.location_county;
+        var locPostcode = req.body.location_postcode;
+        var locCountry = req.body.location_country;
+
+        console.log(locName);
+        console.log(locLine1);
+        console.log(locLine2);
+        console.log(locLine3);
+        console.log(locCity);
+        console.log(locCounty);
+        console.log(locPostcode);
+        console.log(locCountry);
+
+        const AddressExists = await dbTools.getAddress(locLine1, locLine2, locLine3, locCity, locCounty, locPostcode, locCountry);
+        if (AddressExists) {
+            const newLocation = await dbTools.createLocation(locName, null, null, AddressExists.address_id);
+            var newEvent = await dbTools.createEvent(title, description, newLocation.lastID, eventDate, sTime, fTime, req.session.user_id);
+
+        } else {    //create new address if doesn't already exist
+            const newAddress = await dbTools.addAddress(locLine1, locLine2, locLine3, locCity, locCounty, locPostcode, locCountry);
+            const newLocation = await dbTools.createLocation(locName, locBuilding, locRoom, newAddress.lastID);
+            var newEvent = await dbTools.createEvent(title, description, newLocation.lastID, eventDate, sTime, fTime, req.session.user_id);
+        }
+
+
+    }
+
+    if (participants) { //works for 1 participant only
+        const participant_id = await dbTools.getUserIdByEmail(participants);
+        await dbTools.inviteParticipant(newEvent.lastID, participant_id.user_id);
+    }
+
+    res.redirect('/calendar'); 
+
 });
 
+                
 app.post('/calendar/edit-event', (req, res) => {
     console.log('calendar/edit-event POST called');
 
@@ -465,69 +495,130 @@ app.post('/calendar/edit-event', (req, res) => {
     res.redirect('/calendar');
 });
 
-app.post('/calendar/create-reservation', (req, res) => {
+app.post('/calendar/create-reservation', async (req, res) => {
     console.log('/calendar/create-reservation POST called');
 
-    //TODO: Check if user acount is a staff member or student
-    db.get("SELECT staff_id FROM Staff WHERE user_id=?", [req.session.user_id], function(error, results) {
-        if (results) {
 
-            //if student:
-            let sTime = req.body.start;
-            let fTime = req.body.end;
-            let slotDate = req.body.slotdate;
-            let staff_id = results.staff_id;
+    //new
+    const staffMember = await dbTools.getStaffByUserId(req.session.user_id);
 
-            console.log(sTime);
-            console.log(fTime);
-            console.log(slotDate);
-            console.log(`staff_id: ${staff_id}`);
-            console.log(`user_id: ${req.session.user_id}`);
+    if (staffMember) {
+            
+        //take form data from create res
+        let location = req.body.location;
+        let sTime = req.body.start;
+        let fTime = req.body.end;
+        let slotDate = req.body.slotdate;
+        let staff_id = staffMember.staff_id;       
+        console.log(sTime);
+        console.log(fTime);
+        console.log(req.session.user_id);
+        console.log(`user_id: ${req.session.user_id}`);
+        console.log(location);
 
-            db.run("INSERT INTO TimeInfo (date, time_start, time_finish) VALUES (?, ?, ?)", [slotDate, sTime, fTime], function(error) {
-                let time_id = this.lastID;
-                console.log(`time_id ${time_id}`);
+        if (location === 'Online') {
+            //create online reservation (location_id=1)
+            console.log(`location is ${location}`);
+            var newRes = await dbTools.createReservation(slotDate, sTime, fTime, 1, staff_id);
+        } else if (location === 'UEA Campus') {
+            //create reservation on campus with a building and room specified
+            console.log(`location is ${location}`);
+            var locBuilding = req.body.res_uea_location_building;
+            var locRoom = req.body.res_uea_location_room;
+            console.log(locBuilding);
+            console.log(locRoom);
 
-                db.run("INSERT INTO BookingSlots (staff_id, time_id) VALUES (?, ?)", [staff_id, time_id]);
+            const locationExists = await dbTools.getLocationByUEARoom(location, locBuilding, locRoom);
+            if (locationExists) {
+                let location_id = locationExists.location_id;
+                console.log(`fTime: ${fTime}`);
+                var newRes = await dbTools.createReservation(slotDate, sTime, fTime, location_id, staff_id);
 
+            } else {    //create new location if doesn't already exist
+                const UEALocation = await dbTools.createLocation('UEA Campus', locBuilding, locRoom, 1);
+                console.log(`fTime: ${fTime}`);
+                var newRes = await dbTools.createReservation(slotDate, sTime, fTime, UEALocation.lastID, staff_id);
+            }
 
-                res.redirect('/calendar');  
-            })
-        } else {
-            res.redirect('/calendar');
-            //TODO:
+        } else {    //for "Other" input
+            console.log(`location is ${location}`);
+            var locName = req.body.res_other_location_name;
+            var locLine1 = req.body.location_line_1;
+            var locLine2 = req.body.location_line_2;
+            var locLine3 = req.body.location_line_3;
+            var locCity = req.body.location_city;
+            var locCounty = req.body.location_county;
+            var locPostcode = req.body.location_postcode;
+            var locCountry = req.body.location_country;
+            console.log(locName);
+            console.log(locLine1);
+            console.log(locLine2);
+            console.log(locLine3);
+            console.log(locCity);
+            console.log(locCounty);
+            console.log(locPostcode);
+            console.log(locCountry);
 
-            // current user is not a staff member and therefore cannot create reserved timeslots
-            // res.render('calendar', {
-            //     not_staff_error_message : 'Sorry, you cannot create reserved timeslots as you are a student.',
-            //     showReservationMenu : true
-            // })
+            //create reservation in custom location and address
+            const AddressExists = await dbTools.getAddress(locLine1, locLine2, locLine3, locCity, locCounty, locPostcode, locCountry);
+            if (AddressExists) {
+                const newLocation = await dbTools.createLocation(locName, null, null, AddressExists.address_id);
+                var newRes = await dbTools.createEvent(slotDate, sTime, fTime, newLocation.lastID, staff_id);
+
+            } else {    //create new address if doesn't already exist
+                const newAddress = await dbTools.addAddress(locLine1, locLine2, locLine3, locCity, locCounty, locPostcode, locCountry);
+                const newLocation = await dbTools.createLocation(locName, locBuilding, locRoom, newAddress.lastID);
+                var newRes = await dbTools.createReservation(slotDate, sTime, fTime, newLocation.lastID, staff_id);
+            }
         }
-    })  
 
+
+
+    } else {    //NOT A STAFF MEMBER TODO
+        //temp - doesn't deal with issue of not being a staff member
+        //res.redirect('/calendar');
+        //TODO:
+
+        // current user is not a staff member and therefore cannot create reserved timeslots
+        // res.render('calendar', {
+        //     not_staff_error_message : 'Sorry, you cannot create reserved timeslots as you are a student.',
+        //     showReservationMenu : true
+        // })
+    }
+     
+    res.redirect('/calendar');
 });
 
-app.get('/slots', (req, res) => {  
+app.get('/slots', async (req, res) => {  
 
     console.log('GET /slots called');
 
-    db.all("SELECT slot_id, s.staff_id, ti.time_id, date, time_start, time_finish, s.user_id, firstname, lastname, email \
-            FROM BookingSlots as bs \
-            INNER JOIN Staff as s \
-                ON bs.staff_id = s.staff_id \
-            INNER JOIN TimeInfo as ti \
-                ON bs.time_id = ti.time_id\
-            INNER JOIN Users as u\
-                ON s.user_id = u.user_id\
-            ORDER BY s.staff_id ASC;", (error, results) => {
+    const slots = await dbTools.getAllReservations();
+    console.log(slots);
+    //pass retrieved data back to calendar
+    res.render('slots', {
+        username : req.session.username,
+        email : req.session.email,
+        slots : slots
+    });
 
-                //pass retrieved data back to calendar
-                res.render('slots', {
-                    username : req.session.username,
-                    email : req.session.email,
-                    slots : results
-                });
-        })
+    // db.all("SELECT slot_id, s.staff_id, ti.time_id, date, time_start, time_finish, s.user_id, firstname, lastname, email \
+    //         FROM BookingSlots as bs \
+    //         INNER JOIN Staff as s \
+    //             ON bs.staff_id = s.staff_id \
+    //         INNER JOIN TimeInfo as ti \
+    //             ON bs.time_id = ti.time_id\
+    //         INNER JOIN Users as u\
+    //             ON s.user_id = u.user_id\
+    //         ORDER BY s.staff_id ASC;", (error, results) => {
+
+    //             //pass retrieved data back to calendar
+    //             res.render('slots', {
+    //                 username : req.session.username,
+    //                 email : req.session.email,
+    //                 slots : results
+    //             });
+    //     })
 
 });
 
@@ -538,13 +629,25 @@ app.post('/slots/confirm-slot', (req, res) => {
     //send confirmation email to student
     const sendMail = require('./frontend/public/javascripts/email.js')
 
-    email = `Dear ${req.session.username}, <br>\
+    //email sent to student
+    let email = `Dear ${req.session.username} ${req.session.lastname}, <br>\
             This is a confirmation email for your meeting with ${req.body.firstname} ${req.body.lastname} \
             on ${req.body.date} \
             from ${req.body.time_start} to ${req.body.time_finish} <br>\
             Your meeting has been added to your calendar on the MyCalendarChum website, \
             and will also be added to your Outlook Calendar once I've implemented it`;
-    sendMail.sendMail(email);
+    // sendMail.sendMail(email, req.session.email);
+    sendMail.sendMail(email, 'mattreid22@btopenworld.com');
+
+    //email sent to staff
+    email = `Dear ${req.body.firstname} ${req.body.lastname}, <br>\
+    This is a confirmation email for your meeting with ${req.session.username} ${req.session.lastname} \
+    on ${req.body.date} \
+    from ${req.body.time_start} to ${req.body.time_finish} <br>\
+    Your meeting has been added to your calendar on the MyCalendarChum website, \
+    and will also be added to your Outlook Calendar once I've implemented it`;
+    // sendMail.sendMail(email, req.body.email);
+    sendMail.sendMail(email, 'mattreid22@btopenworld.com');
 
     //has to remove slot booking from Bookingslots
     //add it to BookedEvents

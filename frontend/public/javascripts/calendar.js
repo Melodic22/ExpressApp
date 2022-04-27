@@ -211,7 +211,7 @@ function openExpandedEventsModal(selectedDate) {
             let eventSummary = `${event.title}: ${event.time_start}-${event.time_finish}`;
             if (event.description) {    eventSummary = eventSummary.concat(`\nDescription: ${event.description}`);     }
             //TODO: change participants_id to find the name of the participant and display whether they've accepted
-            if (event.participant_id) {   eventSummary = eventSummary.concat(`\nParticipants: ${event.participants_id}`);    }
+            if (event.participant_id) {   eventSummary = eventSummary.concat(`\nParticipants: ${event.participant_id}`);    }
             eventDiv.innerText = eventSummary;
             expandedEventsModal.append(eventDiv);
             
@@ -373,6 +373,85 @@ function openForm(evt, formName) {
 
 
   }
+
+//controls optional location dropdowns in create event form and create reservation form
+function checkIfCustomLocation(form) {
+
+    const locationSelect = document.getElementById(`js-${form}-location`);
+    
+    const ueaLocInputs = document.getElementById(`js-${form}-extra-uea-location-input`);
+    const otherLocInputs = document.getElementById(`js-${form}-extra-other-location-input`);
+
+
+    //extra input for "UEA Campus"
+    const buildingInput = document.getElementById(`${form}-building-input`);
+    const roomInput = document.getElementById(`${form}-room-input`);
+    
+    //extra inputs for "Other"
+    const nameInput = document.getElementById(`${form}-loc-name-in`);
+
+    const line1Input = document.getElementById(`${form}-loc-add-1-in`);
+    const line2Input = document.getElementById(`${form}-loc-add-2-in`);
+    const line3Input = document.getElementById(`${form}-loc-add-3-in`);
+    const cityInput = document.getElementById(`${form}-loc-city-in`);
+    const countyInput = document.getElementById(`${form}-loc-county-in`);
+    const postcodeInput = document.getElementById(`${form}-loc-postcode-in`);
+    const countryInput = document.getElementById(`${form}-loc-country-in`);
+
+    if (locationSelect.value == 'Online') {
+        //hide extra inputs
+        ueaLocInputs.style.display = 'none';
+        otherLocInputs.style.display = 'none';
+
+        //disable extra inputs
+        buildingInput.disabled = true;
+        roomInput.disabled = true;
+        
+        nameInput.disabled = true;
+        line1Input.disabled = true;
+        line2Input.disabled = true;
+        line3Input.disabled = true;
+        cityInput.disabled = true;
+        countyInput.disabled = true;
+        postcodeInput.disabled = true;
+        countryInput.disabled = true;
+    } else if (locationSelect.value == 'UEA Campus') {
+        //hide extra inputs
+        ueaLocInputs.style.display = 'block';
+        otherLocInputs.style.display = 'none';
+
+        //disable extra inputs
+        buildingInput.disabled = false;
+        roomInput.disabled = false;
+
+        nameInput.disabled = true;
+        line1Input.disabled = true;
+        line2Input.disabled = true;
+        line3Input.disabled = true;
+        cityInput.disabled = true;
+        countyInput.disabled = true;
+        postcodeInput.disabled = true;
+        countryInput.disabled = true;
+    } else if (locationSelect.value == 'Other (Please specify)') {
+        //hide extra inputs
+        ueaLocInputs.style.display = 'none';
+        otherLocInputs.style.display = 'block';
+
+        //disable extra inputs
+        buildingInput.disabled = true;
+        roomInput.disabled = true;
+
+        nameInput.disabled = false;
+        line1Input.disabled = false;
+        line2Input.disabled = false;
+        line3Input.disabled = false;
+        cityInput.disabled = false;
+        countyInput.disabled = false;
+        postcodeInput.disabled = false;
+        countryInput.disabled = false;
+    }
+}
+                             
 
 
 initEventListeners();

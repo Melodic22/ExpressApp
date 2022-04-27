@@ -275,7 +275,7 @@ button {
 }
 
 /* mine */
-.event-input {
+.event-input, .reservation-input {
     padding: 10px;
     width: 100%;
     box-sizing: border-box;

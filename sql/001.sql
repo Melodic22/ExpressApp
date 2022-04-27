@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS Users (
     user_id INTEGER PRIMARY KEY, 
     firstname TEXT NOT NULL, 
     lastname TEXT NOT NULL, 
-    email TEXT NOT NULL, 
+    email TEXT NOT NULL UNIQUE, 
     password TEXT NOT NULL
 );
 
@@ -37,8 +37,10 @@ CREATE TABLE IF NOT EXISTS BookingSlots (
     slot_id INTEGER PRIMARY KEY,
     staff_id INTEGER NOT NULL,
     time_id INTEGER NOT NULL,
+    location_id INTEGER NOT NULL,
     FOREIGN KEY(staff_id) REFERENCES staff(staff_id),
-    FOREIGN KEY(time_id) REFERENCES timeinfo(time_id)
+    FOREIGN KEY(time_id) REFERENCES timeinfo(time_id),
+    FOREIGN KEY(location_id) REFERENCES Locations(location_id)
 );
 
 CREATE TABLE IF NOT EXISTS BookedEvents (
@@ -72,8 +74,11 @@ CREATE TABLE IF NOT EXISTS ParticipationType (
 CREATE TABLE IF NOT EXISTS Locations (
     location_id INTEGER PRIMARY KEY,
     location_name TEXT NOT NULL,
+    location_building TEXT,
+    location_room REAL,
     address_id INTEGER,
-    FOREIGN KEY(address_id) REFERENCES Addresses(address_id)
+    FOREIGN KEY(address_id) REFERENCES Addresses(address_id),
+    UNIQUE (location_name, location_building, location_room)
 );
 
 CREATE TABLE IF NOT EXISTS Addresses (
@@ -88,9 +93,9 @@ CREATE TABLE IF NOT EXISTS Addresses (
 );
 
 --initialise premade locations and participation types
-INSERT INTO Locations VALUES (1, 'online', null);
+INSERT INTO Locations VALUES (1, 'Online', null, null, null);
 INSERT INTO Addresses VALUES (1, 'University of East Anglia', 'Norwich Research Park', null, 'Norwich', 'Norfolk', 'NR4 7TJ', 'United Kingdom');
-INSERT INTO Locations VALUES (2, 'UEA', 1);
+-- --INSERT INTO Locations VALUES (2, 'Unversity of East Anglia', 1); --has to now also have a building and room number
 INSERT INTO ParticipationType VALUES (1, 'null');
 INSERT INTO ParticipationType VALUES (2, 'invited');
 INSERT INTO ParticipationType VALUES (3, 'confirmed');
