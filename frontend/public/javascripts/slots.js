@@ -49,13 +49,21 @@ function confirmSlot(slot) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(slot)
-    }).then(response => response.json())
-    .then(data => {
-        console.log('Sucess:', data)
+    }).then(response => {
+        console.log('received response');
+        if (response.status === 201) {
+            console.log('response successful');
+            fetch('/calendar');
+        }
+
     })
     .catch((error) => {
         console.log('Error:', error);
     });
+
+    // window.location.href = "http://localhost:5000/calendar";
+    // console.log('hi');
+    // fetch('/calendar');
 }
 
 function confirmSlotBooking(slot) {
@@ -64,7 +72,7 @@ function confirmSlotBooking(slot) {
                 \nwith ${slot.firstname} ${slot.lastname} \
                 \n(${slot.email})`)) {
         confirmSlot(slot); //only call ShowConfirmedSlotInformation if POST request successful (no error 404)
-        showConfirmedSlotInformation(slot);
+        //showConfirmedSlotInformation(slot);
     } else {
         showCancelledSlotInformation(slot);
     }

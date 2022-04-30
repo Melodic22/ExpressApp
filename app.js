@@ -14,42 +14,17 @@ const db = new sqlite3.Database('./db.sqlite3');
 //enable foreign keys
 db.run("PRAGMA foreign_keys = ON")
 
-// db.run("DROP TABLE accounts");
-//db.run("DROP TABLE events");
+async function populateDatabase() {
 
-//db.run("INSERT INTO events (user_id, location_id, title, date, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?)", [2, 3, 'test', '17/04/2022', '16:00:00', '17:00:00']);
-// db.run("INSERT INTO events (user_id, location_id, title, date, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?)", [2, 4, 'newtest', '18/04/2022', '14:00:00', '14:15:00']);
+    //create online reservations
+    await dbTools.createReservation('30/04/2022', '16:45', '17:45', 1, 1);
+    await dbTools.createReservation('29/04/2022', '15:45', '17:45', 1, 1);
+    await dbTools.createReservation('28/04/2022', '15:45', '17:45', 1, 2);
+    await dbTools.createReservation('27/04/2022', '16:45', '17:45', 1, 2);
+    await dbTools.createReservation('26/04/2022', '14:45', '16:00', 1, 2);
+};
 
-// db.run("INSERT INTO events (user_id, location_id, title, date, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?)", [1, 3, 'em event', '17/04/2022', '16:00:00', '17:00:00']);
-// db.run("INSERT INTO events (user_id, location_id, title, date, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?)", [1, 4, 'em another event', '18/04/2022', '14:00:00', '14:15:00']);
-
-//db.run("INSERT INTO events (user_id, location_id, participants, title, description, date, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [1, 4, 'matt and em', 'em another event', 'this is a description', '20/04/2022', '14:00:00', '14:15:00']);
-
-
-
-// db.run('CREATE TABLE IF NOT EXISTS accounts (' +
-//         'user_id INTEGER PRIMARY KEY NOT NULL,' +
-//         'firstname TEXT NOT NULL,' +
-//         'lastname TEXT NOT NULL,' +
-//         'email TEXT NOT NULL,' +
-//         'password TEXT NOT NULL' +
-//         ')'
-//     );
-
-// db.run('CREATE TABLE IF NOT EXISTS events (' +
-//         'event_id INTEGER PRIMARY KEY NOT NULL,' +
-//         'user_id INTEGER NOT NULL,' +
-//         'location_id TEXT NOT NULL,' +
-//         'participants TEXT,' +       //may have to change to "supervisor_id"
-//         'title TEXT NOT NULL,' +
-//         'description TEXT,' +
-//         'date TEXT NOT NULL,' +    //"YYYY-MM-DD HH:MM:SS.SSS"
-//         'start_time TEXT NOT NULL,' +    //HH:MM:SS.SSS" 
-//         'end_time TEXT NOT NULL' +      //HH:MM:SS.SSS"     
-//         ')'
-//     );
-
-// db.get("INSERT INTO accounts (id, username, password, email) VALUES (1, 'test', 'test', 'test@test.com')");
+//populateDatabase();
 
 //app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static("frontend/public"));
@@ -66,6 +41,7 @@ app.use(express.urlencoded({ extended: true }));
 const ejs = require('express');
 const { redirect } = require('express/lib/response');
 const { time } = require('console');
+const { all } = require('express/lib/application');
 //specify where the views are stored
 app.set('views', __dirname + '/frontend/public');
 //specify the view engine
@@ -84,84 +60,25 @@ app.get('/calendar', async function (req, res) {
             req.session.user_id = user_id.user_id;
 
             let bookedEvents = await dbTools.getBookedEventsByUserId(req.session.user_id);
-            console.log(bookedEvents);
+            //console.log(bookedEvents);
             let bookedSlots = await dbTools.getBookedSlotsByUserId(req.session.user_id);
-            console.log(bookedSlots);
+            //console.log(bookedSlots);
+            let allEvents = bookedEvents.concat(bookedSlots);
+            //sort all events in order of time_start so they can be displayed in order
+            allEvents.sort((a, b) => a.time_start.localeCompare(b.time_start));
+            console.log(allEvents);
+
 
             res.render('calendar', {
                 username : req.session.username,
                 bookedEvents : bookedEvents,
-                bookedSlots : bookedSlots
+                bookedSlots : bookedSlots,
+                allEvents : allEvents
             });
 
         } else {
             res.redirect('/');
-        }
-            //temp
-
-            //get current user_id
-            // db.get("SELECT user_id FROM Users WHERE email = ?", [req.session.email], (error, results) => {
-            //     let user_id = results.user_id;
-                
-                //for use elsewhere in the program when accessing the db (not ac globally accessible - need to fix)
-                // req.session.user_id = user_id.user_id;
-
-
-                
-                // console.log('userid in /calendar: '+ req.session.user_id);
-                
-                // //select all confirmed events for current user
-                // db.serialize( async () => {
-                //     // db.all("SELECT * \
-                //     //         FROM BookedEvents as b \
-                //     //             INNER JOIN TimeInfo as t \
-                //     //                 ON b.time_id = t.time_id \
-                //     //             INNER JOIN EventInfo as e \
-                //     //                 ON e.event_id = b.event_id \
-                //     //             LEFT OUTER JOIN Participations as p \
-                //     //                 ON b.event_id = p.event_id \
-                //     //             LEFT OUTER JOIN ParticipationType as pt \
-                //     //                 ON pt.participation_type_id = p.participation_type_id \
-                //     //             LEFT OUTER JOIN Locations as l \
-                //     //                 ON e.location_id = l.location_id \
-                //     //             LEFT OUTER JOIN Addresses as a \
-                //     //                 ON l.address_id = a.address_id \
-                //     //             WHERE b.host_id = ?", [req.session.user_id], (error, results) => {
-                        
-                //                     //let bookedEvents = results;
-                //                     console.log(bookedEvents);
-
-                //                     //select all reserved slots     //may need to also get email of user?
-                //                     db.all("SELECT * \
-                //                             FROM BookingSlots as bs \
-                //                                 INNER JOIN Staff as s \
-                //                                     ON bs.staff_id = s.staff_id \
-                //                                 INNER JOIN TimeInfo as ti \
-                //                                     ON bs.time_id = ti.time_id \
-                //                                 WHERE s.user_id = ?", [req.session.user_id], (error, results) => {
-                //                                     let bookedSlots = results;
-                //                                     console.log(bookedSlots)
-
-                //                                     //pass retrieved data back to calendar
-                //                                     res.render('calendar', {
-                //                                         username : req.session.username,
-                //                                         bookedEvents : bookedEvents,
-                //                                         bookedSlots : bookedSlots
-                //                                     });
-                //                                 })
-                                    
-
-                                    
-                //                 //}
-                //     //)
-                // })
-            //})
-
-            //TODO: potentially also display outlook events on the same calendar? (toggle option)
-
-    // } else {
-    //     res.redirect('/');
-    // }
+        }        
     
 });
 
@@ -495,6 +412,13 @@ app.post('/calendar/edit-event', (req, res) => {
     res.redirect('/calendar');
 });
 
+//TODO:
+app.delete('/calendar/events/:id', async (req, res) => {
+    console.log(`slot_id to delete ${req.params.id}`);
+    //remove record from db
+
+});
+
 app.post('/calendar/create-reservation', async (req, res) => {
     console.log('/calendar/create-reservation POST called');
 
@@ -623,10 +547,23 @@ app.get('/slots', async (req, res) => {
 });
 
 //when a reserved slot is confirmed by a user
-app.post('/slots/confirm-slot', (req, res) => {
+app.post('/slots/confirm-slot', async (req, res) => {
     console.log('POST /slots/confirm-slot called');
 
-    //send confirmation email to student
+    const currentSlot = await dbTools.getReservationById(req.body.slot_id);
+    console.log(currentSlot);
+
+    //add it to BookedEvents, eventInfo, Locations, addresses, timeinfo, users (host), participations
+    const newEvent = await dbTools.createEventFromReservation('Advisor Meeting', 'A meeting between student and advisor', currentSlot.location_id,
+        currentSlot.time_id, currentSlot.staff_id);
+    console.log(`user_id: ${req.session.user_id}`);
+    await dbTools.addParticipant(newEvent.lastID, req.session.user_id);
+
+    //remove slot booking from Bookingslots
+    await dbTools.removeReservationById(currentSlot.slot_id);
+
+    
+    //send confirmation emails to both users
     const sendMail = require('./frontend/public/javascripts/email.js')
 
     //email sent to student
@@ -649,10 +586,9 @@ app.post('/slots/confirm-slot', (req, res) => {
     // sendMail.sendMail(email, req.body.email);
     sendMail.sendMail(email, 'mattreid22@btopenworld.com');
 
-    //has to remove slot booking from Bookingslots
-    //add it to BookedEvents
-    //send confirmation emails to both users
     //add the event to each of their personal calendars (should be automatic)
+    // res.redirect('/calendar');
+    res.status(201).send();
     //add the event to each of their outlook calendars
 
 });

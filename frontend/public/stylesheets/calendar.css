@@ -202,7 +202,7 @@ button {
         background-color: #c8d8e4;
     }
 
-.event, .slot {
+.event, .slot, .confirmedSlot {
     font-size: 10px;
     padding: 3px;
     color: white;
@@ -217,6 +217,10 @@ button {
 
 .slot {
     background-color: #bb1592;
+}
+
+.confirmedSlot {
+    background-color: #40ca00ad;
 }
 
 .event-expanded {
@@ -239,6 +243,7 @@ button {
     box-shadow: none !important;
 }
 
+/* and #tabModal */
 #deleteEventModal, #editEventModal, #tabModal {
     display: none;
     z-index: 20;
@@ -248,7 +253,7 @@ button {
     border-radius: 5px;
     width: 400px;
     top: 100px;
-    left: calc(50% - 175px);
+    left: 25%;
     position: absolute;
     font-family: sans-serif;
 }
@@ -369,3 +374,33 @@ button {
     from {opacity: 0;}
     to {opacity: 1;}
   }
+
+#bootstrapModal {
+    display: none;
+}
+
+#js-new-event-title {
+    color: black;
+}
+
+#expandedViewModalLabel {
+    color: black;
+}
+
+.bs-event-expanded {
+    /* border-bottom: 1px solid rgb(145, 145, 145); */
+    margin: 30px 0px;
+}
+
+.bs-event-expanded:hover {
+    background-color: #dddddd;
+}
+
+.bs-event-expanded:hover > #event-btn-delete, .bs-event-expanded:hover > #event-btn-edit {
+    display: block;
+}
+
+#event-btn-delete, #event-btn-edit {
+    display: none;
+}
+

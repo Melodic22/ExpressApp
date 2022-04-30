@@ -24,5 +24,3 @@ function sendMail(email, recipient) {
 };
 
 module.exports = {sendMail};
-
-//kpryfzbzrggslqlm

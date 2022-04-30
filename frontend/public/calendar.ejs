@@ -10,7 +10,9 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
         <!-- Load an icon library to show a hamburger menu (bars) on small screens -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
+        <!--load bootstrap bundle (for modal)-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+        
         <title>MyCalendarChum</title>
     </head>
 
@@ -44,6 +46,9 @@
 
             let bookedSlots = <%- JSON.stringify(bookedSlots) %>;
             console.log(bookedSlots);
+
+            let allEvents = <%- JSON.stringify(allEvents) %>;
+            console.log(allEvents);
         </script>
 
       
@@ -79,120 +84,193 @@
 
                         <div id="calendar"></div>
                     </div>
-
-
                     
-                    <!-- Tab content -->
+                    <!-- New Event and New Reservation Modals -->
+                    <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
 
-                    <div id="tabModal">
+                                    <ul class="nav nav-pills mb-3" id="myTab" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                          <button class="nav-link active" id="event-tab" data-bs-toggle="tab" data-bs-target="#event" type="button" role="tab" aria-controls="home" aria-selected="true">Event</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                          <button class="nav-link" id="reservation-tab" data-bs-toggle="tab" data-bs-target="#reservation" type="button" role="tab" aria-controls="profile" aria-selected="false">Reservation</button>
+                                        </li>
+                                      </ul>
 
-                        <!-- Tab links -->
-                        <div class="tab">
-                            <button class="tablinks" onclick="openForm(event, 'newEventModal')"  id="defaultOpen">Event</button>
-                            <button class="tablinks" onclick="openForm(event, 'newReservationModal')">Reservation</button>
-                        </div>
+                                    <h5 class="modal-title" id="createModalLabel">Modal title</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 
-                        <div id="newEventModal" class="tabcontent">
-                            <h4 id="js-new-event-title">New Event</h4>
-    
-                            <form action="/calendar/create-event" method="POST">
-                                
-                                
-                                <input type="hidden" id="event-date-input" name="eventdate"/>
-                                <!--change id name once I have finalised calendar.js (it currently uses event-title-input)-->
-                                <input type="text" id="event-title-in" class="event-input" name="title" placeholder="Title" required/> 
-                                <input type="text" id="event-desc-input" class="event-input" name="description" placeholder="Description"/>
-                                <!-- <input type="text" id="event-loc-input" class="event-input" name="location" placeholder="Location" required/> -->
-                                <input type="email" id="event-participants-input" class="event-input" name="participants" placeholder="Participants (UEA Email)"/>
-                                <label for="start">Start</label><br>
-                                <!-- temp had to get rid of step=900 and required-->
-                                <input type="time" id="event-start-time-input" class="event-input" name="s" placeholder="Start Time" />
-                                <label for="end">End</label><br>
-                                <input type="time" id="event-finish-time-input" class="event-input" name="e" placeholder="Finish Time"  />
-
-                                <label for="location">Location</label>
-                                <select name="location" id="js-ev-location" class="reservation-input" onchange="checkIfCustomLocation('ev')" >
-                                    <option value="Online">Online</option>
-                                    <option value="UEA Campus">UEA Campus</option>
-                                    <option value="Other (Please specify)">Other (Please specify)</option>
-                                </select>
-
-                                <div id="js-ev-extra-uea-location-input" style="display:none;">
-                                    <input type="text" id="ev-building-input" class="event-input" name="ev_uea_location_building" placeholder="Building" required disabled>
-                                    <input type="text" id="ev-room-input" class="event-input" name="ev_uea_location_room" placeholder="Room Floor and Number (e.g. 2.37)" required disabled>
                                 </div>
 
-                                <div id="js-ev-extra-other-location-input" style="display:none;">
-                                    <input type="text" id="ev-loc-name-in" class="event-input" name="ev_other_location_name" placeholder="Location Name" required disabled>
-                                    <input type="text" id="ev-loc-add-1-in" class="event-input" name="location_line_1" placeholder="Address Line 1" required disabled>
-                                    <input type="text" id="ev-loc-add-2-in" class="event-input" name="location_line_2" placeholder="Address Line 2" disabled>
-                                    <input type="text" id="ev-loc-add-3-in" class="event-input" name="location_line_3" placeholder="Address Line 3" disabled>
-                                    <input type="text" id="ev-loc-city-in" class="event-input" name="location_city" placeholder="City" required disabled>
-                                    <input type="text" id="ev-loc-county-in" class="event-input" name="location_county" placeholder="County" disabled>
-                                    <input type="text" id="ev-loc-postcode-in" class="event-input" name="location_postcode" placeholder="Postcode" required disabled>
-                                    <input type="text" id="ev-loc-country-in" class="event-input" name="location_country" placeholder="Country" disabled>
-                                </div>                              
-    
-                                <input id="createButton" type="submit" value="Create"></input>
-                                <button id="cancelButton" type="button">Cancel</button>
-                            </form>
-    
-                        </div>
+                                <div class="modal-body">
+                                    
+                                    <div class="tab-content" id="myTabContent">
 
-                
+                                        <div class="tab-pane fade show active" id="event" role="tabpanel" aria-labelledby="event-tab">
+
+                                            <div class="container-fluid">
+                                                
+                                                <form action="/calendar/create-event" method="POST">
+                                    
+                                                    <h4 id="js-new-event-title"></h4>
+
+                                                    <input type="hidden" id="event-date-input" name="eventdate"/>
+                                                    <!--change id name once I have finalised calendar.js (it currently uses event-title-input)-->
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <input type="text" id="event-title-in" class="event-input" name="title" placeholder="Title" required/>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <input type="text" id="event-desc-input" class="event-input" name="description" placeholder="Description"/>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <input type="email" id="event-participants-input" class="event-input" name="participants" placeholder="Participants (UEA Email)"/>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <label for="start">Start</label><br>
+                                                            <!-- temp had to get rid of step=900 and required-->
+                                                            <input type="time" id="event-start-time-input" class="event-input" name="s" placeholder="Start Time" />
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label for="end">End</label><br>
+                                                            <input type="time" id="event-finish-time-input" class="event-input" name="e" placeholder="Finish Time"  />
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <label for="location">Location</label>
+                                                            <select name="location" id="js-ev-location" class="reservation-input" onchange="checkIfCustomLocation('ev')" >
+                                                                <option value="Online">Online</option>
+                                                                <option value="UEA Campus">UEA Campus</option>
+                                                                <option value="Other (Please specify)">Other (Please specify)</option>
+                                                            </select>
+
+                                                            <div id="js-ev-extra-uea-location-input" style="display:none;">
+                                                                <input type="text" id="ev-building-input" class="event-input" name="ev_uea_location_building" placeholder="Building" required disabled>
+                                                                <input type="text" id="ev-room-input" class="event-input" name="ev_uea_location_room" placeholder="Room Floor and Number (e.g. 2.37)" required disabled>
+                                                            </div>
+
+                                                            <div id="js-ev-extra-other-location-input" style="display:none;">
+                                                                <input type="text" id="ev-loc-name-in" class="event-input" name="ev_other_location_name" placeholder="Location Name" required disabled>
+                                                                <input type="text" id="ev-loc-add-1-in" class="event-input" name="location_line_1" placeholder="Address Line 1" required disabled>
+                                                                <input type="text" id="ev-loc-add-2-in" class="event-input" name="location_line_2" placeholder="Address Line 2" disabled>
+                                                                <input type="text" id="ev-loc-add-3-in" class="event-input" name="location_line_3" placeholder="Address Line 3" disabled>
+                                                                <input type="text" id="ev-loc-city-in" class="event-input" name="location_city" placeholder="City" required disabled>
+                                                                <input type="text" id="ev-loc-county-in" class="event-input" name="location_county" placeholder="County" disabled>
+                                                                <input type="text" id="ev-loc-postcode-in" class="event-input" name="location_postcode" placeholder="Postcode" required disabled>
+                                                                <input type="text" id="ev-loc-country-in" class="event-input" name="location_country" placeholder="Country" disabled>
+                                                            </div>                     
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-sm-6 d-grid gap-2">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        </div>
+
+                                                        <div class="col-sm-6 d-grid gap-2">
+                                                            <button type="submit" class="btn btn-primary">Create Event</button>
+                                                        </div>
+                                                    </div>
+
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                        <div class="tab-pane fade" id="reservation" role="tabpanel" aria-labelledby="reservation-tab">
+
+                                            <div class="container-fluid">
+
+                                                <form action="/calendar/create-reservation" method="POST">
+                                    
+                                                    <h4 id="js-new-reservation-title"></h4>
+
+                                                    <input type="hidden" id="slot-date-input" name="slotdate"/>
+                                                    <!--change id name once I have finalised calendar.js (it currently uses event-title-input)-->
+                                                    <!-- <input type="text" id="res-title-input" class="event-input" name="title" placeholder="Title" required/>  -->
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <label for="start">Start</label><br>
+                                                            <input type="time" id="res-start-time-input" class="event-input" name="start" placeholder="Start Time" required/>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label for="end">End</label><br>
+                                                            <input type="time" id="res-finish-time-input" class="event-input" name="end" placeholder="Finish Time" required/>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <label for="location">Location</label>
+                                                            <select name="location" id="js-res-location" class="reservation-input" onchange="checkIfCustomLocation('res')" >
+                                                                <option value="Online">Online</option>
+                                                                <option value="UEA Campus">UEA Campus</option>
+                                                                <option value="Other (Please specify)">Other (Please specify)</option>
+                                                            </select>
+                            
+                                                            <div id="js-res-extra-uea-location-input" style="display:none;">
+                                                                <input type="text" id="res-building-input" class="event-input" name="res_uea_location_building" placeholder="Building" required disabled>
+                                                                <input type="text" id="res-room-input" class="event-input" name="res_uea_location_room" placeholder="Room Floor and Number (e.g. 2.37)" required disabled>
+                                                            </div>
+                            
+                                                            <div id="js-res-extra-other-location-input" style="display:none;">
+                                                                <input type="text" id="res-loc-name-in" class="event-input" name="res_other_location_name" placeholder="Location Name" required disabled>
+                                                                <input type="text" id="res-loc-add-1-in" class="event-input" name="location_line_1" placeholder="Address Line 1" required disabled>
+                                                                <input type="text" id="res-loc-add-2-in" class="event-input" name="location_line_2" placeholder="Address Line 2" disabled>
+                                                                <input type="text" id="res-loc-add-3-in" class="event-input" name="location_line_3" placeholder="Address Line 3" disabled>
+                                                                <input type="text" id="res-loc-city-in" class="event-input" name="location_city" placeholder="City" required disabled>
+                                                                <input type="text" id="res-loc-county-in" class="event-input" name="location_county" placeholder="County" disabled>
+                                                                <input type="text" id="res-loc-postcode-in" class="event-input" name="location_postcode" placeholder="Postcode" required disabled>
+                                                                <input type="text" id="res-loc-country-in" class="event-input" name="location_country" placeholder="Country" disabled>
+                                                            </div> 
+                                                        </div>
+                                                    </div>   
+                                                    
+                                                    
+                                                    <!-- <label for="event-reminder-checkbox">Email Reminder?</label> -->
+                                                    <!-- <input type="checkbox" id="js-event-reminder-checkbox" class="event-checkbox"/> -->
+                    
+                                                    
+                                                    
                         
-                        <div id="newReservationModal" class="tabcontent">
-                            <h4 id="js-new-reservation-title">New Reservation</h4>
-    
-                            <form action="/calendar/create-reservation" method="POST">
-                                
-                                
-                                <input type="hidden" id="slot-date-input" name="slotdate"/>
-                                <!--change id name once I have finalised calendar.js (it currently uses event-title-input)-->
-                                <!-- <input type="text" id="res-title-input" class="event-input" name="title" placeholder="Title" required/>  -->
-                                <label for="start">Start</label><br>
-                                <input type="time" id="res-start-time-input" class="event-input" name="start" placeholder="Start Time" required/>
-                                <label for="end">End</label><br>
-                                <input type="time" id="res-finish-time-input" class="event-input" name="end" placeholder="Finish Time" required/>
+                                                    <div class="row">
+                                                        <div class="col-sm-6 d-grid gap-2">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        </div>
 
-                                
+                                                        <div class="col-sm-6 d-grid gap-2">
+                                                            <button type="submit" class="btn btn-primary">Create Reservation</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                <label for="location">Location</label>
-                                <select name="location" id="js-res-location" class="reservation-input" onchange="checkIfCustomLocation('res')" >
-                                    <option value="Online">Online</option>
-                                    <option value="UEA Campus">UEA Campus</option>
-                                    <option value="Other (Please specify)">Other (Please specify)</option>
-                                </select>
-
-                                <div id="js-res-extra-uea-location-input" style="display:none;">
-                                    <input type="text" id="res-building-input" class="event-input" name="res_uea_location_building" placeholder="Building" required disabled>
-                                    <input type="text" id="res-room-input" class="event-input" name="res_uea_location_room" placeholder="Room Floor and Number (e.g. 2.37)" required disabled>
                                 </div>
 
-                                <div id="js-res-extra-other-location-input" style="display:none;">
-                                    <input type="text" id="res-loc-name-in" class="event-input" name="res_other_location_name" placeholder="Location Name" required disabled>
-                                    <input type="text" id="res-loc-add-1-in" class="event-input" name="location_line_1" placeholder="Address Line 1" required disabled>
-                                    <input type="text" id="res-loc-add-2-in" class="event-input" name="location_line_2" placeholder="Address Line 2" disabled>
-                                    <input type="text" id="res-loc-add-3-in" class="event-input" name="location_line_3" placeholder="Address Line 3" disabled>
-                                    <input type="text" id="res-loc-city-in" class="event-input" name="location_city" placeholder="City" required disabled>
-                                    <input type="text" id="res-loc-county-in" class="event-input" name="location_county" placeholder="County" disabled>
-                                    <input type="text" id="res-loc-postcode-in" class="event-input" name="location_postcode" placeholder="Postcode" required disabled>
-                                    <input type="text" id="res-loc-country-in" class="event-input" name="location_country" placeholder="Country" disabled>
-                                </div>    
-                                
-                                
-                                <!-- <label for="event-reminder-checkbox">Email Reminder?</label> -->
-                                <!-- <input type="checkbox" id="js-event-reminder-checkbox" class="event-checkbox"/> -->
+                                <div class="modal-footer">
 
-                                
-                                
-    
-                                <input id="createButton" type="submit" value="Create"></input>
-                                <button id="cancelButton" type="button">Cancel</button>
-                            </form>
-    
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <!--end of modals-->
 
                     
 
@@ -220,10 +298,33 @@
                     </div>
 
 
-                    <div id="expandedEventsModal">
-                        <h2 id="js-expanded-events-modal-title"></h2>
+                
+                    
+                    <!-- ExpandedviewModal -->
+                    <div class="modal fade" id="expandedViewModal" tabindex="-1" aria-labelledby="expandedViewModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title" id="expandedViewModalLabel"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                            
+                                    <div class="container-fluid" id="expandedViewGrid">
+                                        
+                                    </div>
 
+                                
+                            </div>
+                            <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button id="buttonTest" type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#createModal">Create New</button>
+
+                            </div>
+                        </div>
+                        </div>
                     </div>
+                    <!--end of expandedViewModal-->
 
                     <div id="deleteEventModal">
                         <h2>Event</h2>

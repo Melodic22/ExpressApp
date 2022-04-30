@@ -6,29 +6,38 @@ PRAGMA foreign_keys = ON;
 -- DROP TABLE Staff;
 
 -- DROP TABLE Users;
--- DROP TABLE Addresses;
+
 -- DROP TABLE ParticipationType;
 -- DROP TABLE Participations;
+-- DROP TABLE BookingSlots;
 -- DROP TABLE BookedEvents;
 -- DROP TABLE TimeInfo;
 -- DROP TABLE EventInfo;
 -- DROP TABLE Locations;
-
+-- DROP TABLE Addresses;
 
 
 
 -- INSERT INTO Users_2 SELECT * FROM Users;
 
- --DROP TABLE BookingSlots;
 
 
---THIS IS THE ORDER EVENTS MUST BE DELETED
+--TO CLEAR ALL EVENT AND SLOT DATA
 -- DELETE FROM participations;
---DELETE FROM ParticipationType;
 -- DELETE FROM BookedEvents;
-DELETE FROM BookingSlots;
-DELETE FROM TimeInfo;
-DELETE FROM EventInfo;
+-- DELETE FROM BookingSlots;
+-- DELETE FROM TimeInfo;
+-- DELETE FROM EventInfo;
+-- DELETE FROM Locations;
+
+--del bookingSlots, timeinfo, locations, addresses order
+
+-- DELETE FROM Addresses WHERE address_id = (SELECT address_id FROM Locations WHERE location_id = (SELECT location_id FROM BookingSlots WHERE slot_id = 5));
+-- DELETE FROM Locations WHERE location_id = (SELECT location_id FROM BookingSlots WHERE slot_id = 5);
+-- DELETE FROM TimeInfo WHERE time_id = (SELECT time_id FROM BookingSlots WHERE slot_id = 5);
+DELETE FROM BookingSlots WHERE slot_id = 4;
+-- INSERT INTO BookingSlots VALUES (5, 1, 22, 4);
+
 
 -- DELETE FROM Staff;
 -- DELETE FROM Users;

@@ -38,9 +38,13 @@ CREATE TABLE IF NOT EXISTS BookingSlots (
     staff_id INTEGER NOT NULL,
     time_id INTEGER NOT NULL,
     location_id INTEGER NOT NULL,
-    FOREIGN KEY(staff_id) REFERENCES staff(staff_id),
-    FOREIGN KEY(time_id) REFERENCES timeinfo(time_id),
-    FOREIGN KEY(location_id) REFERENCES Locations(location_id)
+    CONSTRAINT fk_myForeignKey
+        FOREIGN KEY(time_id) 
+        REFERENCES TimeInfo(time_id)
+        ON DELETE CASCADE
+    -- FOREIGN KEY(staff_id) REFERENCES Staff(staff_id), 
+    -- FOREIGN KEY(location_id) REFERENCES Locations(location_id)
+        
 );
 
 CREATE TABLE IF NOT EXISTS BookedEvents (
@@ -48,8 +52,8 @@ CREATE TABLE IF NOT EXISTS BookedEvents (
     time_id INTEGER NOT NULL,
     event_id INTEGER NOT NULL,
     FOREIGN KEY (host_id) REFERENCES Users(user_id),
-    FOREIGN KEY (time_id) REFERENCES timeinfo(time_id),
-    FOREIGN KEY (event_id) REFERENCES eventinfo(event_id),
+    FOREIGN KEY (time_id) REFERENCES TimeInfo(time_id),
+    FOREIGN KEY (event_id) REFERENCES EventInfo(event_id),
     PRIMARY KEY (event_id)
 );
 

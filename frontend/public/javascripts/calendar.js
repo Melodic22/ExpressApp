@@ -10,6 +10,10 @@ const deleteEventModal = document.getElementById('deleteEventModal');
 const expandedEventsModal = document.getElementById('expandedEventsModal');
 const tabModal = document.getElementById('tabModal');
 const backDrop = document.getElementById('modalBackDrop');
+const bootstrapModal = document.getElementById('bootstrapModal');
+const createModal = new bootstrap.Modal(document.getElementById('createModal'), {});
+const expandedViewGrid = document.getElementById('expandedViewGrid');
+const expandedModalCreateNewButton = document.getElementById('expandedModalCreateNewButton');
 //changed from event-title-input temporarily
 const eventTitleInput = document.getElementById('event-title-in');
 const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -26,6 +30,7 @@ function smallScreenSettings() {
     this.document.getElementById('friday').innerText = 'Fri';
     this.document.getElementById('saturday').innerText = 'Sat';
     this.document.getElementById('sunday').innerText = 'Sun';
+    
 }
 
 function standardScreenSettings() {
@@ -41,22 +46,22 @@ function standardScreenSettings() {
     this.document.getElementById('sunday').innerText = 'Sunday';
 }
 
-function openModal(date) {
-    clicked = date;
-    //loop through all events and find any where their date matches the date of the clicked day //replace with database GET requests
-    const eventForDay = events.find(e => e.date === clicked);
+// function openModal(date) {
+//     clicked = date;
+//     //loop through all events and find any where their date matches the date of the clicked day //replace with database GET requests
+//     const eventForDay = events.find(e => e.date === clicked);
 
-    if (eventForDay) {  //if there is any events
-        document.getElementById('eventText').innerText = eventForDay.title;
-        deleteEventModal.style.display = 'block';
+//     if (eventForDay) {  //if there is any events
+//         document.getElementById('eventText').innerText = eventForDay.title;
+//         deleteEventModal.style.display = 'block';
 
-    } else {    //if no events for selected day
-        newEventModal.style.display = 'block';
-        const newEventTitle = document.getElementById('js-new-event-title').innerText = `New event for ${date}`;
-    }
+//     } else {    //if no events for selected day
+//         newEventModal.style.display = 'block';
+//         const newEventTitle = document.getElementById('js-new-event-title').innerText = `New event for ${date}`;
+//     }
 
-    backDrop.style.display = 'block';
-}
+//     backDrop.style.display = 'block';
+// }
 
 
 function load() {
@@ -118,6 +123,9 @@ function load() {
     for (let i = 1; i <= paddingDays + daysInMonth; i++) {
         const daySquare = document.createElement('div');
         daySquare.classList.add('day'); 
+        //temp
+        //daySquare.type = 'button';
+        
 
 
         if (i > paddingDays) {
@@ -155,7 +163,11 @@ function load() {
                 if (event.date === dayString) {
                     //temp display
                     const eventDiv = document.createElement('div');
-                    eventDiv.classList.add('event');
+                    if (event.title === 'Advisor Meeting') {
+                        eventDiv.classList.add('confirmedSlot');
+                    } else {
+                        eventDiv.classList.add('event');
+                    }
                     eventDiv.innerText = `${event.title}: ${event.time_start} to ${event.time_finish}`;
                     daySquare.appendChild(eventDiv);
 
@@ -174,6 +186,7 @@ function load() {
             })
 
             //daySquare.addEventListener('click', () => openModal(dayString)); //used for local storage examples //TODO: call view day function 
+            //daySquare.addEventListener('click', () => openExpandedEventsModal(dayString)); //used for personal events stored in database
             daySquare.addEventListener('click', () => openExpandedEventsModal(dayString)); //used for personal events stored in database
 
 
@@ -192,55 +205,184 @@ function load() {
 function openExpandedEventsModal(selectedDate) {
 
     //clear the previous content from the last time modal was opened
-    expandedEventsModal.innerHTML = '';
+    //expandedEventsModal.innerHTML = '';
+
+    //bootstrap
+    document.getElementById('expandedViewGrid').innerHTML = '';
 
     //events for current day boolean
     let events = false;
 
-    personalEvents.forEach(function(event) {
+
+    //personalEvents.forEach(function(event) {
+    allEvents.forEach(function(event) {
         if (event.date === selectedDate) {
             events = true;
 
             //add display element for event
-            const eventDiv = document.createElement('div');
-            eventDiv.classList.add('event-expanded');
-            console.log(event);
+            // const eventDiv = document.createElement('div');
+            // eventDiv.classList.add('event-expanded');
+            // console.log(event);
             
             
-            //construct eventDiv text depending on optional values
-            let eventSummary = `${event.title}: ${event.time_start}-${event.time_finish}`;
-            if (event.description) {    eventSummary = eventSummary.concat(`\nDescription: ${event.description}`);     }
-            //TODO: change participants_id to find the name of the participant and display whether they've accepted
-            if (event.participant_id) {   eventSummary = eventSummary.concat(`\nParticipants: ${event.participant_id}`);    }
-            eventDiv.innerText = eventSummary;
-            expandedEventsModal.append(eventDiv);
+            // //construct eventDiv text depending on optional values
+            // let eventSummary = `${event.title}: ${event.time_start}-${event.time_finish}`;
+            // if (event.description) {    eventSummary = eventSummary.concat(`\nDescription: ${event.description}`);     }
+            // //TODO: change participants_id to find the name of the participant and display whether they've accepted
+            // if (event.participant_id) {   eventSummary = eventSummary.concat(`\nParticipants: ${event.participant_id}`);    }
+            // eventDiv.innerText = eventSummary;
+            // expandedEventsModal.append(eventDiv);
             
             //to edit/delete an event
-            eventDiv.addEventListener('click', () => openEditEventModal(event)); //TODO: add this
+            //eventDiv.addEventListener('click', () => openEditEventModal(event)); //TODO: add this
+            
+
+            //bootstrap
+            const eventRow = document.createElement('div');
+            eventRow.classList.add('row');
+            eventRow.classList.add('bs-event-expanded');
+            expandedViewGrid.append(eventRow);
+
+            const eventCol = document.createElement('div');
+            eventCol.classList.add('col-sm-10');
+            // eventCol.classList.add('bs-event-expanded');
+            eventRow.append(eventCol);
+
+            /* add back in if I need an edit button */
+            // const eventBtnEditCol = document.createElement('button');
+            // eventBtnEditCol.classList.add('col-2');
+            // eventBtnEditCol.classList.add('btn');
+            // eventBtnEditCol.classList.add('btn-success');
+            // eventBtnEditCol.setAttribute('id', 'event-btn-edit');
+            // eventBtnEditCol.innerText = 'Edit';
+            // eventRow.append(eventBtnEditCol);
+            /* end of edit button code */
+
+            const eventBtnCol = document.createElement('button');
+            eventBtnCol.classList.add('col-sm-2');
+            eventBtnCol.classList.add('btn');
+            eventBtnCol.classList.add('btn-danger');
+            eventBtnCol.setAttribute('id', 'event-btn-delete');
+            eventBtnCol.innerText = 'Delete';  
+
+            console.log(event);
+            if (event.slot_id) {
+
+                //display reservation details
+                var eventSummary = `Reserved Slot: ${event.time_start}-${event.time_finish}`;
+                if (event.location_id === 1) {
+                    eventSummary = eventSummary.concat(`\nLocation: ${event.location_name}`);
+                } else if (event.location_name === 'UEA Campus') {
+                    eventSummary = eventSummary.concat(`\nLocation: ${event.location_name}, ${event.location_building}, Room ${event.location_room}`);
+                } else {
+                    //replacing null address values with ''
+                    const line2 = event.line_2 === '' ? '' : `${event.line_2},`
+                    const line3 = event.line_3 === '' ? '' : `${event.line_3},`
+                    const county = event.county === '' ? '' : `${event.county},`
+                    const country = event.country === '' ? '' : `${event.country}`
+                    eventSummary = eventSummary.concat(`\nLocation: ${event.line_1}, ${line2} ${line3} ${event.city}, ${county} ${event.postcode}, ${country}`);
+                }
+                
+                //TODO: change participants_id to find the name of the participant and display whether they've accepted
+                eventBtnCol.addEventListener('click', () => {
+                    removeReservation(event);
+                });
+            } else if (event.event_id) {
+
+                //display event details
+                var eventSummary = `${event.title}: ${event.time_start}-${event.time_finish}`;
+                if (event.description) {    eventSummary = eventSummary.concat(`\nDescription: ${event.description}`);     }
+                //TODO: change participants_id to find the name of the participant and display whether they've accepted
+                if (event.participant_id) {   eventSummary = eventSummary.concat(`\nParticipants: ${event.participant_id}`);    }
+
+                eventBtnCol.addEventListener('click', () => {
+                    console.log('remove event');
+                    //removeEvent(event);
+                });  
+            }
+            eventRow.append(eventBtnCol);
+
+            //document.getElementById('buttonTest').addEventListener('resize', openCreateModal(selectedDate));
+            document.getElementById('js-new-event-title').innerText = `Create event for ${selectedDate}`;
+            document.getElementById('event-date-input').value = selectedDate;
+            document.getElementById('js-new-reservation-title').innerText = `Create reservation for ${selectedDate}`;
+            document.getElementById('slot-date-input').value = selectedDate;
+
+            
+            
+
+            eventCol.innerText = eventSummary;
+
+            //display reservation details
             
         }
     });
 
     //if there are events for the current day, show the expanded view modal
     if (events) {
-        const heading = document.createElement('h2').innerText = `Events for ${selectedDate}`;
-        expandedEventsModal.prepend(heading);
+        //const heading = document.createElement('h2').innerText = `Events for ${selectedDate}`;
+        // expandedEventsModal.prepend(heading);
 
-        expandedEventsModal.style.display = 'block';
-        backDrop.style.display = 'block';
+        // expandedEventsModal.style.display = 'block';
+        // backDrop.style.display = 'block';
+
+        //bootstrap
+        
+        const expandedViewModal = new bootstrap.Modal(document.getElementById('expandedViewModal'), {});
+        document.getElementById('expandedViewModalLabel').innerText = `Events for ${selectedDate}`;
+        expandedViewModal.show();
+
     } else {    //if no events for current day then open new event modal
 
         //TEMP (this uses local storage)
-        openModal(selectedDate);
+        //openModal(selectedDate);
         //ACTUAL
-        openNewEventModal(selectedDate);
+        //openNewEventModal(selectedDate);
+
+        //show bootstrap new event and reservation modals and update js elements
+
+        openCreateModal(selectedDate);
+
+
+
     }
 
 }
 
+
+
+function openCreateModal(selectedDate) {
+    document.getElementById('js-new-event-title').innerText = `Create event for ${selectedDate}`;
+    document.getElementById('event-date-input').value = selectedDate;
+    document.getElementById('js-new-reservation-title').innerText = `Create reservation for ${selectedDate}`;
+    document.getElementById('slot-date-input').value = selectedDate;
+    createModal.show();
+}
+
+function removeReservation(event) {
+    //send delete request to delete event data
+    fetch('/calendar/events/' + event.slot_id, {
+        method: 'DELETE',
+        headers: {
+            'Accept' : 'application/json',
+            'Content-Type': 'application/json'
+        },
+    }).then(response => {
+        console.log('received response');
+        if (response.status === 201) {
+            console.log('response successful');
+            fetch('/calendar');
+        }
+
+    })
+    .catch((error) => {
+        console.log('Error:', error);
+    });
+}
+
 function openNewEventModal(date) {
 
-    //newEventModal.style.display = 'block';
+    newEventModal.style.display = 'block';
     
     tabModal.style.display = 'block';
 
@@ -350,29 +492,29 @@ function myFunction() {
     }
 }
 
-/* tab links */
-function openForm(evt, formName) {
-    // Declare all variables
-    var i, tabcontent, tablinks;
+// /* tab links */
+// function openForm(evt, formName) {
+//     // Declare all variables
+//     var i, tabcontent, tablinks;
   
-    // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-      tabcontent[i].style.display = "none";
-    }
+//     // Get all elements with class="tabcontent" and hide them
+//     tabcontent = document.getElementsByClassName("tabcontent");
+//     for (i = 0; i < tabcontent.length; i++) {
+//       tabcontent[i].style.display = "none";
+//     }
   
-    // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-      tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
+//     // Get all elements with class="tablinks" and remove the class "active"
+//     tablinks = document.getElementsByClassName("tablinks");
+//     for (i = 0; i < tablinks.length; i++) {
+//       tablinks[i].className = tablinks[i].className.replace(" active", "");
+//     }
   
-    // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(formName).style.display = "block";
-    evt.currentTarget.className += " active";
+//     // Show the current tab, and add an "active" class to the button that opened the tab
+//     document.getElementById(formName).style.display = "block";
+//     evt.currentTarget.className += " active";
 
 
-  }
+//   }
 
 //controls optional location dropdowns in create event form and create reservation form
 function checkIfCustomLocation(form) {
