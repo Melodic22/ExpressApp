@@ -7,35 +7,39 @@ PRAGMA foreign_keys = ON;
 
 -- DROP TABLE Users;
 
--- DROP TABLE ParticipationType;
--- DROP TABLE Participations;
--- DROP TABLE BookingSlots;
--- DROP TABLE BookedEvents;
--- DROP TABLE TimeInfo;
--- DROP TABLE EventInfo;
--- DROP TABLE Locations;
--- DROP TABLE Addresses;
+DROP TABLE ParticipationType;
+DROP TABLE Participations;
+DROP TABLE BookingSlots;
+DROP TABLE BookedEvents;
+DROP TABLE TimeInfo;
+DROP TABLE EventInfo;
+DROP TABLE Locations;
+DROP TABLE Addresses;
 
 
-
--- INSERT INTO Users_2 SELECT * FROM Users;
+-- INSERT INTO BookingSlots VALUES (1, 2, 3, 4);
+-- INSERT INTO TimeInfo VALUES (1, '25/11/2000', '15:34', '14,35');
+-- INSERT OR IGNORE INTO TimeInfo VALUES (2, '25/11/2000', '15:34', '14,35');
 
 
 
 --TO CLEAR ALL EVENT AND SLOT DATA
 -- DELETE FROM participations;
 -- DELETE FROM BookedEvents;
--- DELETE FROM BookingSlots;
+--  DELETE FROM BookingSlots;
 -- DELETE FROM TimeInfo;
 -- DELETE FROM EventInfo;
 -- DELETE FROM Locations;
 
 --del bookingSlots, timeinfo, locations, addresses order
 
+--INSERT INTO Locations VALUES (1, 'Online', null, null, null);
+
+-- SELECT address_id FROM Addresses WHERE address_id = (SELECT address_id FROM Locations WHERE location_id = (SELECT location_id FROM BookingSlots WHERE slot_id = 5));
 -- DELETE FROM Addresses WHERE address_id = (SELECT address_id FROM Locations WHERE location_id = (SELECT location_id FROM BookingSlots WHERE slot_id = 5));
 -- DELETE FROM Locations WHERE location_id = (SELECT location_id FROM BookingSlots WHERE slot_id = 5);
 -- DELETE FROM TimeInfo WHERE time_id = (SELECT time_id FROM BookingSlots WHERE slot_id = 5);
-DELETE FROM BookingSlots WHERE slot_id = 4;
+-- DELETE FROM BookingSlots WHERE slot_id = 4;
 -- INSERT INTO BookingSlots VALUES (5, 1, 22, 4);
 
 

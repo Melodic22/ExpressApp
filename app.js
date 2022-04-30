@@ -12,9 +12,18 @@ const app = express();
 
 const db = new sqlite3.Database('./db.sqlite3');
 //enable foreign keys
-db.run("PRAGMA foreign_keys = ON")
 
 async function populateDatabase() {
+
+    // db.serialize(() => {
+    //     db.run("PRAGMA foreign_keys = ON");
+    //     db.run("INSERT INTO BookingSlots VALUES (1, 2, 3, 4)");
+    
+    // });
+
+    // await dbTools.test();
+
+    //db.run("INSERT INTO BookingSlots VALUES (1, 2, 3, 4)");
 
     //create online reservations
     await dbTools.createReservation('30/04/2022', '16:45', '17:45', 1, 1);
@@ -22,9 +31,20 @@ async function populateDatabase() {
     await dbTools.createReservation('28/04/2022', '15:45', '17:45', 1, 2);
     await dbTools.createReservation('27/04/2022', '16:45', '17:45', 1, 2);
     await dbTools.createReservation('26/04/2022', '14:45', '16:00', 1, 2);
+
+    //duplicate time entry, slot_id:1 and slot_id:6 should both reference time_id 1
+    await dbTools.createReservation('30/04/2022', '16:45', '17:45', 1, 1);
+};
+
+async function databaseTesting() {
+
+    
+    //should keep time_id:1 as it's referenced by both slot_id:1 and 6
+    await dbTools.deleteOnlineReservation(8);
 };
 
 //populateDatabase();
+//databaseTesting();
 
 //app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static("frontend/public"));
@@ -329,7 +349,7 @@ app.post('/calendar/create-event', async (req, res) => {
         console.log(locBuilding);
         console.log(locRoom);
 
-        const locationExists = await dbTools.getLocationByUEARoom(location, locBuilding, locRoom);
+        const locationExists = await dbTools.getLocationByUEARoom(location, locBuilding, locRoom, 1);
         if (locationExists) {
             let location_id = locationExists.location_id;
             var newEvent = await dbTools.createEvent(title, description, location_id, eventDate, sTime, fTime, req.session.user_id);
@@ -416,7 +436,22 @@ app.post('/calendar/edit-event', (req, res) => {
 app.delete('/calendar/events/:id', async (req, res) => {
     console.log(`slot_id to delete ${req.params.id}`);
     //remove record from db
+    await dbTools.deleteReservation(req.params.id);
 
+
+    //const event = await dbTools.getReservationById(req.params.id);
+
+    //console.log(`event to delete ${JSON.stringify(event)}`);
+
+    // if (event.location_id === 1) {
+    //     await dbTools.deleteOnlineReservation(event.slot_id);
+    // } else if (event.location_id === 2) {
+    //     //don't delete related address record
+    // } else {
+    //     //delete all related records
+    //     //await dbTools.deleteReservation(req.params.id);
+    // }
+    
 });
 
 app.post('/calendar/create-reservation', async (req, res) => {
@@ -452,7 +487,7 @@ app.post('/calendar/create-reservation', async (req, res) => {
             console.log(locBuilding);
             console.log(locRoom);
 
-            const locationExists = await dbTools.getLocationByUEARoom(location, locBuilding, locRoom);
+            const locationExists = await dbTools.getLocationByUEARoom(location, locBuilding, locRoom, 1);
             if (locationExists) {
                 let location_id = locationExists.location_id;
                 console.log(`fTime: ${fTime}`);
@@ -486,8 +521,21 @@ app.post('/calendar/create-reservation', async (req, res) => {
             //create reservation in custom location and address
             const AddressExists = await dbTools.getAddress(locLine1, locLine2, locLine3, locCity, locCounty, locPostcode, locCountry);
             if (AddressExists) {
-                const newLocation = await dbTools.createLocation(locName, null, null, AddressExists.address_id);
-                var newRes = await dbTools.createEvent(slotDate, sTime, fTime, newLocation.lastID, staff_id);
+                console.log(`address already exists`);
+
+                //check if loc exists
+                const locationExists = await dbTools.getLocationbyLocNameAddress(locName, AddressExists.address_id);
+                console.log(`here`);
+                if (locationExists) {
+                    console.log(`location already exists`);
+                    var newRes = await dbTools.createReservation(slotDate, sTime, fTime, locationExists.location_id, staff_id);
+                } else {    //loc doesn't already exist
+
+                    const newLocation = await dbTools.createLocation(locName, null, null, AddressExists.address_id);
+                    console.log(`here2`);
+                    var newRes = await dbTools.createReservation(slotDate, sTime, fTime, newLocation.lastID, staff_id);
+                    console.log(`here3`);
+                }
 
             } else {    //create new address if doesn't already exist
                 const newAddress = await dbTools.addAddress(locLine1, locLine2, locLine3, locCity, locCounty, locPostcode, locCountry);

@@ -30,20 +30,18 @@ CREATE TABLE IF NOT EXISTS TimeInfo (
     time_id INTEGER PRIMARY KEY,
     date INTEGER NOT NULL,
     time_start INTEGER NOT NULL,
-    time_finish INTEGER NOT NULL
+    time_finish INTEGER NOT NULL,
+    UNIQUE(date, time_start, time_finish)
 );
 
 CREATE TABLE IF NOT EXISTS BookingSlots (
     slot_id INTEGER PRIMARY KEY,
     staff_id INTEGER NOT NULL,
     time_id INTEGER NOT NULL,
-    location_id INTEGER NOT NULL,
-    CONSTRAINT fk_myForeignKey
-        FOREIGN KEY(time_id) 
-        REFERENCES TimeInfo(time_id)
-        ON DELETE CASCADE
-    -- FOREIGN KEY(staff_id) REFERENCES Staff(staff_id), 
-    -- FOREIGN KEY(location_id) REFERENCES Locations(location_id)
+    location_id INTEGER NOT NULL,    
+    FOREIGN KEY(time_id) REFERENCES TimeInfo(time_id),
+    FOREIGN KEY(staff_id) REFERENCES Staff(staff_id), 
+    FOREIGN KEY(location_id) REFERENCES Locations(location_id)
         
 );
 
@@ -82,7 +80,7 @@ CREATE TABLE IF NOT EXISTS Locations (
     location_room REAL,
     address_id INTEGER,
     FOREIGN KEY(address_id) REFERENCES Addresses(address_id),
-    UNIQUE (location_name, location_building, location_room)
+    UNIQUE (location_name, location_building, location_room, address_id)
 );
 
 CREATE TABLE IF NOT EXISTS Addresses (
