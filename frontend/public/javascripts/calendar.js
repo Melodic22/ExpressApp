@@ -44,25 +44,7 @@ function standardScreenSettings() {
     this.document.getElementById('friday').innerText = 'Friday';
     this.document.getElementById('saturday').innerText = 'Saturday';
     this.document.getElementById('sunday').innerText = 'Sunday';
-}
-
-// function openModal(date) {
-//     clicked = date;
-//     //loop through all events and find any where their date matches the date of the clicked day //replace with database GET requests
-//     const eventForDay = events.find(e => e.date === clicked);
-
-//     if (eventForDay) {  //if there is any events
-//         document.getElementById('eventText').innerText = eventForDay.title;
-//         deleteEventModal.style.display = 'block';
-
-//     } else {    //if no events for selected day
-//         newEventModal.style.display = 'block';
-//         const newEventTitle = document.getElementById('js-new-event-title').innerText = `New event for ${date}`;
-//     }
-
-//     backDrop.style.display = 'block';
-// }
-
+};
 
 function load() {
 
@@ -72,48 +54,25 @@ function load() {
         smallScreenSettings();
     }
 
-    // //show reservation menu on page render if not_staff_member error occured 
-    // if (showReservationMenu) {
-    //     openForm(event, 'newReservationModal')
-    // }
+    //disable and hide reservation tab button if the user is a student account
+    if (accountType === 'student') {
+        document.getElementById('reservation-tab').innerText = '';
+        document.getElementById('reservation-tab').disabled = true;
+    };
 
-
-
-
-    //get current date
-    const date = new Date();
-    //set month to selected month
-    if (nav !== 0) {
-        date.setMonth(new Date().getMonth() + nav);
-    }
-    //current day
-    const day = weekdays[date.getDay() % 7 - 1];
-    //current month
-    const month = months[date.getMonth()];
-    
-    //current year
-    const year = date.getFullYear();
-
-
-
-    //set to selected month
-    //date.setMonth(date.getMonth() + nav);
+    const date = new Date();    //get current date
+    if (nav !== 0) { date.setMonth(new Date().getMonth() + nav); };  //set month to selected month
+    const day = weekdays[date.getDay() % 7 - 1];    //current day
+    const month = months[date.getMonth()];  //current month
+    const year = date.getFullYear();    //current year
 
     let monthIndex = date.getMonth(); //feb = 1
     monthIndex = monthIndex + nav;
 
-    console.log("Current date " + day, month, year);
-
     //gets the date before the start of next month (i.e. the last date of the current month)
     const daysInMonth = new Date(year, monthIndex+1, 0).getDate();
-    console.log("Days in current month " + daysInMonth);
-
-    const firstDayOfMonth = new Date(year, monthIndex, 1);
-    console.log("first day " + firstDayOfMonth);
-
-    
+    const firstDayOfMonth = new Date(year, monthIndex, 1);    
     const paddingDays = firstDayOfMonth.getDay() - 1; //-1 due to view starting on monday
-    console.log(paddingDays);
 
     document.getElementById('monthDisplay').innerText = `${date.toLocaleDateString('en-us', { month: 'long'})} ${year}`;
 
@@ -122,10 +81,7 @@ function load() {
 
     for (let i = 1; i <= paddingDays + daysInMonth; i++) {
         const daySquare = document.createElement('div');
-        daySquare.classList.add('day'); 
-        //temp
-        //daySquare.type = 'button';
-        
+        daySquare.classList.add('day');       
 
 
         if (i > paddingDays) {
@@ -135,58 +91,75 @@ function load() {
             //creating daystring in the format: mm/dd/yyyy
             const day = `${i - paddingDays}`.padStart(2, '0');
             const month = `${monthIndex + 1}`.padStart(2, '0');
-
             let dayString = `${day}/${month}/${year}`;
-            console.log(`dayString: ${dayString}`);
-
-            //old daystring (deprecated) ----- will have to update how events are stored in local storage
-            //dayString = `${i - paddingDays}/${monthIndex + 1}/${year}`;
-            //console.log(`daystring ${dayString}`)
-
-            const eventForDay = events.find(e => e.date === dayString);
 
             if (i - paddingDays === date.getDate() && nav === 0) {
                 daySquare.id = 'currentDay';
             }
 
-            //if there is a personal event for the current day in local storage
-            if (eventForDay) {
-                const eventDiv = document.createElement('div');
-                eventDiv.classList.add('event');
-                eventDiv.innerText = eventForDay.title;
-                daySquare.appendChild(eventDiv);
-            }
-
-            //if there is a personal event in the database
-            personalEvents.forEach(function(event) {
-                console.log(event.date);
+            //new code
+            allEvents.forEach(function(event) {
                 if (event.date === dayString) {
-                    //temp display
-                    const eventDiv = document.createElement('div');
-                    if (event.title === 'Advisor Meeting') {
-                        eventDiv.classList.add('confirmedSlot');
-                    } else {
-                        eventDiv.classList.add('event');
-                    }
-                    eventDiv.innerText = `${event.title}: ${event.time_start} to ${event.time_finish}`;
-                    daySquare.appendChild(eventDiv);
+                    if (event.title) {  //if is event (not reservation)
 
-                    //eventDiv.addEventListener('click', () => openExpandedEventModal(event));
+                        const eventDiv = document.createElement('div');
+                        if (event.title === 'Advisor Meeting') {
+                            eventDiv.classList.add('confirmedSlot');
+                        } else {
+                            eventDiv.classList.add('event');
+                        }
+                        eventDiv.innerText = `${event.title}: ${event.time_start} to ${event.time_finish}`;
+                        daySquare.appendChild(eventDiv);
+
+                    }
+
+                    if (event.slot_id) {
+
+                        const eventDiv = document.createElement('div');
+                        eventDiv.classList.add('slot');
+                        eventDiv.innerText = `Reserved Slot: ${event.time_start} to ${event.time_finish}`;
+                        daySquare.appendChild(eventDiv);
+                    }
                 }
             });
 
-            //if there is any reserved slots in the database
-            bookedSlots.forEach(function(slot) {
-                if (slot.date === dayString) {
-                    const eventDiv = document.createElement('div');
-                    eventDiv.classList.add('slot');
-                    eventDiv.innerText = `Reserved Slot: ${slot.time_start} to ${slot.time_finish}`;
-                    daySquare.appendChild(eventDiv);
-                }
-            })
+            //if there is a personal event in the database
+            // personalEvents.forEach(function(event) {
+            //     console.log(event.date);
+            //     if (event.date === dayString) {
+            //         //temp display
+            //         const eventDiv = document.createElement('div');
+            //         if (event.title === 'Advisor Meeting') {
+            //             eventDiv.classList.add('confirmedSlot');
+            //         } else {
+            //             eventDiv.classList.add('event');
+            //         }
+            //         eventDiv.innerText = `${event.title}: ${event.time_start} to ${event.time_finish}`;
+            //         daySquare.appendChild(eventDiv);
 
-            //daySquare.addEventListener('click', () => openModal(dayString)); //used for local storage examples //TODO: call view day function 
-            //daySquare.addEventListener('click', () => openExpandedEventsModal(dayString)); //used for personal events stored in database
+            //         //eventDiv.addEventListener('click', () => openExpandedEventModal(event));
+            //     }
+            // });
+
+            // //if there is any reserved slots in the database
+            // bookedSlots.forEach(function(slot) {
+            //     if (slot.date === dayString) {
+            //         const eventDiv = document.createElement('div');
+            //         eventDiv.classList.add('slot');
+            //         eventDiv.innerText = `Reserved Slot: ${slot.time_start} to ${slot.time_finish}`;
+            //         daySquare.appendChild(eventDiv);
+            //     }
+            // });
+
+            // participantEvents.forEach(function(partEvent) {
+            //     if (partEvent.date === dayString) {
+            //         const eventDiv = document.createElement('div');
+            //         eventDiv.classList.add('participantEvent');
+            //         eventDiv.innerText = `Guest Event: ${partEvent.time_start} to ${partEvent.time_finish}`;
+            //         daySquare.appendChild(eventDiv);
+            //     }
+            // });
+
             daySquare.addEventListener('click', () => openExpandedEventsModal(dayString)); //used for personal events stored in database
 
 
@@ -297,7 +270,7 @@ function openExpandedEventsModal(selectedDate) {
 
                 eventBtnCol.addEventListener('click', () => {
                     console.log('remove event');
-                    //removeEvent(event);
+                    removeEvent(event);
                 });  
             }
             eventRow.append(eventBtnCol);
@@ -334,8 +307,6 @@ function openExpandedEventsModal(selectedDate) {
 
     } else {    //if no events for current day then open new event modal
 
-        //TEMP (this uses local storage)
-        //openModal(selectedDate);
         //ACTUAL
         //openNewEventModal(selectedDate);
 
@@ -361,7 +332,27 @@ function openCreateModal(selectedDate) {
 
 function removeReservation(event) {
     //send delete request to delete event data
-    fetch('/calendar/events/' + event.slot_id, {
+    fetch('/calendar/reservations/' + event.slot_id, {
+        method: 'DELETE',
+        headers: {
+            'Accept' : 'application/json',
+            'Content-Type': 'application/json'
+        },
+    }).then(response => {
+        console.log('received response');
+        if (response.status === 204) {
+            console.log('response successful');
+        }
+    }).catch((error) => {
+        console.log('Error:', error);
+    });
+
+    window.location.href = "http://localhost:5000/calendar";
+};
+
+function removeEvent(event) {
+    //send delete request to delete event data
+    fetch('/calendar/events/' + event.event_id, {
         method: 'DELETE',
         headers: {
             'Accept' : 'application/json',
@@ -378,7 +369,7 @@ function removeReservation(event) {
     .catch((error) => {
         console.log('Error:', error);
     });
-}
+};
 
 function openNewEventModal(date) {
 
@@ -469,7 +460,6 @@ function initEventListeners() {
     //document.getElementById('saveButton').addEventListener('click', saveEvent);   //deprecated (for local storage only)
     document.getElementById('cancelButton2').addEventListener('click', closeModal);
     document.getElementById('deleteButton').addEventListener('click', deleteEvent);
-    document.getElementById('navToggle').addEventListener('click', myFunction);
     backDrop.addEventListener('click', closeModal);
 
     //event listener for resizing of screen
@@ -483,7 +473,7 @@ function initEventListeners() {
 }
 
 /* Toggle between adding and removing the "responsive" class to topnav when the user clicks on the icon */
-function myFunction() {
+function toggleNav() {
     var x = document.getElementById("myTopnav");
     if (x.className === "topnav") {
         x.className += " responsive";

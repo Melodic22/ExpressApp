@@ -202,7 +202,7 @@ button {
         background-color: #c8d8e4;
     }
 
-.event, .slot, .confirmedSlot {
+.event, .slot, .confirmedSlot, .participantEvent {
     font-size: 10px;
     padding: 3px;
     color: white;
@@ -221,6 +221,10 @@ button {
 
 .confirmedSlot {
     background-color: #40ca00ad;
+}
+
+.participantEvent {
+    background-color: blue;
 }
 
 .event-expanded {

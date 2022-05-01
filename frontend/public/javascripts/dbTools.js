@@ -57,21 +57,44 @@ async function getUserIdByEmail(email) {
 
 async function getBookedEventsByUserId(host_id) {
     let db = await getDatabase();
-    return await db.all(`SELECT b.event_id, b.host_id, b.time_id, t.date, t.time_start, t.time_finish, e.title, e.description, e.location_id, l.location_name, l.location_building, l.location_room, l.address_id, a.line_1, a.line_2, a.line_3, a.city, a.county, a.postcode, a.country
-                        FROM BookedEvents as b 
-                            INNER JOIN TimeInfo as t 
-                                ON b.time_id = t.time_id 
-                            INNER JOIN EventInfo as e 
-                                ON e.event_id = b.event_id 
-                            LEFT OUTER JOIN Participations as p 
-                                ON b.event_id = p.event_id 
-                            LEFT OUTER JOIN ParticipationType as pt 
-                                ON pt.participation_type_id = p.participation_type_id 
-                            LEFT OUTER JOIN Locations as l 
-                                ON e.location_id = l.location_id 
-                            LEFT OUTER JOIN Addresses as a 
-                                ON l.address_id = a.address_id 
-                            WHERE b.host_id = ?;`, [host_id]);
+    return await db.all(`SELECT b.event_id, b.host_id, b.time_id, t.date, t.time_start, t.time_finish, e.title, e.description, e.location_id, \
+                            l.location_name, l.location_building, l.location_room, l.address_id, a.line_1, a.line_2, a.line_3, a.city, a.county, a.postcode, a.country, \
+                            p.participant_id, pt.participation_type_id, pt.participation_type_name \
+                        FROM BookedEvents as b \
+                            INNER JOIN TimeInfo as t \
+                                ON b.time_id = t.time_id \
+                            INNER JOIN EventInfo as e \
+                                ON e.event_id = b.event_id \
+                            LEFT OUTER JOIN Participations as p \
+                                ON b.event_id = p.event_id \
+                            LEFT OUTER JOIN ParticipationType as pt \
+                                ON pt.participation_type_id = p.participation_type_id \
+                            LEFT OUTER JOIN Locations as l \
+                                ON e.location_id = l.location_id \
+                            LEFT OUTER JOIN Addresses as a \
+                                ON l.address_id = a.address_id \
+                            WHERE b.host_id = ?`, [host_id]);
+};
+
+async function getBookedEventsByParticipantId(participant_id) {
+    let db = await getDatabase();
+    return await db.all(`SELECT b.event_id, b.host_id, b.time_id, t.date, t.time_start, t.time_finish, e.title, e.description, e.location_id, \
+                            l.location_name, l.location_building, l.location_room, l.address_id, a.line_1, a.line_2, a.line_3, a.city, a.county, a.postcode, a.country, \
+                            p.participant_id, pt.participation_type_id, pt.participation_type_name \
+                        FROM BookedEvents as b \
+                            INNER JOIN TimeInfo as t \
+                                ON b.time_id = t.time_id \
+                            INNER JOIN EventInfo as e \
+                                ON e.event_id = b.event_id \
+                            LEFT OUTER JOIN Participations as p \
+                                ON b.event_id = p.event_id \
+                            LEFT OUTER JOIN ParticipationType as pt \
+                                ON pt.participation_type_id = p.participation_type_id \
+                            LEFT OUTER JOIN Locations as l \
+                                ON e.location_id = l.location_id \
+                            LEFT OUTER JOIN Addresses as a \
+                                ON l.address_id = a.address_id \
+                            WHERE p.participant_id = ?`, [participant_id]);
 };
 
 async function getBookedSlotsByUserId(host_id) {
@@ -132,8 +155,64 @@ async function createEvent(title, description, location_id, eventDate, sTime, fT
     const db = await getDatabase();
 
     const EventInfo = await db.run(`INSERT INTO EventInfo (title, description, location_id) VALUES (?, ?, ?)`, [title, description, location_id]);
-    const TimeInfo = await db.run(`INSERT INTO TimeInfo (date, time_start, time_finish) VALUES (?, ?, ?)`, [eventDate, sTime, fTime]);
-    return await db.run(`INSERT INTO BookedEvents (host_id, time_id, event_id) VALUES (?, ?, ?)`, [host_id, TimeInfo.lastID, EventInfo.lastID]);
+    
+    const timeExists = await db.get(`SELECT * FROM TimeInfo WHERE date=? and time_start=? and time_finish=?`, [eventDate, sTime, fTime]);
+    
+    if (timeExists) {
+        return await db.run(`INSERT INTO BookedEvents (host_id, time_id, event_id) VALUES (?, ?, ?)`, [host_id, timeExists.time_id, EventInfo.lastID]);
+    } else {
+        const TimeInfo = await db.run(`INSERT INTO TimeInfo (date, time_start, time_finish) VALUES (?, ?, ?)`, [eventDate, sTime, fTime]);
+        return await db.run(`INSERT INTO BookedEvents (host_id, time_id, event_id) VALUES (?, ?, ?)`, [host_id, TimeInfo.lastID, EventInfo.lastID]);
+    }
+    
+};
+
+async function deleteEvent(event_id) {
+    const db = await getDatabase();
+
+    const addressExists = await db.get(`SELECT address_id FROM Addresses WHERE address_id = (
+                                        SELECT address_id FROM Locations WHERE location_id = (
+                                            SELECT location_id FROM BookingSlots WHERE slot_id = ?))`, [slot_id]);
+
+    const location_id = await db.get(`SELECT location_id FROM Locations WHERE location_id = (
+                                        SELECT location_id FROM BookingSlots WHERE slot_id = ?)`, [slot_id]);
+    console.log(`location_id ${location_id.location_id}`);
+
+    const time_id = await db.get(`SELECT time_id FROM TimeInfo WHERE time_id = (
+                                    SELECT time_id FROM BookingSlots WHERE slot_id = ?)`, [slot_id]);
+    console.log(`time_id ${time_id.time_id}`);
+
+
+
+    if (location_id.location_id !== 1) {    //not online
+
+        if (addressExists.address_id === 1) {   //uea address - don't delete address
+
+
+            await db.run(`DELETE FROM BookingSlots WHERE slot_id = ?`, [slot_id]);
+            //won't delete the timeInfo record if it's referenced from another BookingSlot
+            await db.run(`DELETE FROM TimeInfo WHERE time_id = ?`, [time_id.time_id]);  
+            //won't delete the locations record if it's referenced from another BookingSlot
+            await db.run(`DELETE FROM Locations WHERE location_id = ?`, [location_id.location_id]);
+
+        } else {    //custom address - delete everything
+ 
+            await db.run(`DELETE FROM BookingSlots WHERE slot_id = ?`, [slot_id]);
+            //won't delete the timeInfo record if it's referenced from another BookingSlot
+            await db.run(`DELETE FROM TimeInfo WHERE time_id = ?`, [time_id.time_id]);  
+            await db.run(`DELETE FROM Locations WHERE location_id = ?`, [location_id.location_id]);
+            //won't delete the addresses record if it's referenced from another Location
+            await db.run(`DELETE FROM Addresses WHERE address_id = ?`, [addressExists.address_id]);
+        }
+
+    } else {    //online - don't delete location or address
+
+        await db.run(`DELETE FROM BookingSlots WHERE slot_id = ?`, [slot_id]);
+        //won't delete the timeInfo record if it's referenced from another BookingSlot
+        await db.run(`DELETE FROM TimeInfo WHERE time_id = ?`, [time_id.time_id]);  
+
+    }
+
 };
 
 async function createEventFromReservation(title, description, location_id, time_id, host_id) {
@@ -241,6 +320,7 @@ async function deleteReservation(slot_id) {
             //won't delete the timeInfo record if it's referenced from another BookingSlot
             await db.run(`DELETE FROM TimeInfo WHERE time_id = ?`, [time_id.time_id]);  
             await db.run(`DELETE FROM Locations WHERE location_id = ?`, [location_id.location_id]);
+            //won't delete the addresses record if it's referenced from another Location
             await db.run(`DELETE FROM Addresses WHERE address_id = ?`, [addressExists.address_id]);
         }
 
@@ -252,16 +332,6 @@ async function deleteReservation(slot_id) {
 
     }
 
-}
-
-async function deleteOnlineReservation(slot_id) {
-    const db = await getDatabase();
-
-    const time_id = await db.get(`SELECT time_id FROM TimeInfo WHERE time_id = (SELECT time_id FROM BookingSlots WHERE slot_id = ?)`, [slot_id]);
-    console.log(`time_id ${time_id.time_id}`);
-    await db.run(`DELETE FROM BookingSlots WHERE slot_id = ?`, [slot_id]);
-    //won't delete the timeInfo record if it's referenced from another BookingSlot
-    await db.run(`DELETE FROM TimeInfo WHERE time_id = ?`, [time_id.time_id]);  
 };
 
 async function removeReservationById(slot_id) {
@@ -300,8 +370,7 @@ async function getReservationById(slot_id) {
                                 ON bs.location_id = l.location_id \
                             LEFT JOIN Addresses as a \
                                 ON l.address_id = a.address_id \
-                            WHERE bs.slot_id = ? \
-                            ORDER BY s.staff_id ASC`, [slot_id]);
+                            WHERE bs.slot_id = ?`, [slot_id]);
 }
 
 
@@ -310,5 +379,6 @@ module.exports = {
     getDatabase, InsertEventInfo, getUserIdByEmail, getBookedEventsByUserId, getBookedSlotsByUserId, getStaffByEmailPassword, 
     getStudentByEmailPassword, createUser, createStaff, createStudent, createEvent, inviteParticipant, createReservation,
     getLocationByUEARoom, createLocation, getAddress, addAddress, getStaffByUserId, getAllReservations, getReservationById,
-    addParticipant, removeReservationById, createEventFromReservation, deleteReservation, deleteOnlineReservation, getLocationbyLocNameAddress
+    addParticipant, removeReservationById, createEventFromReservation, deleteReservation, getLocationbyLocNameAddress,
+    getBookedEventsByParticipantId
 }

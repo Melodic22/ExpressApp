@@ -91,7 +91,8 @@ CREATE TABLE IF NOT EXISTS Addresses (
     city TEXT NOT NULL,
     county TEXT,
     postcode TEXT NOT NULL,
-    country TEXT
+    country TEXT,
+    UNIQUE (line_1, line_2, line_3, city, county, postcode, country)
 );
 
 --initialise premade locations and participation types

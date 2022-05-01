@@ -26,7 +26,7 @@
             <a href="logout" id="top-right-nav-2">Sign out</a>
             <a id="top-right-nav">Welcome <%= username %></a>
             
-            <a href="javascript:void(0);" class="icon" id="navToggle">
+            <a href="javascript:void(0);" class="icon" onclick="toggleNav()">
                 <i class="fa fa-bars"></i>
             </a>
         </div>
@@ -49,6 +49,10 @@
 
             let allEvents = <%- JSON.stringify(allEvents) %>;
             console.log(allEvents);
+
+            let participantEvents = <%- JSON.stringify(participantEvents) %>;
+
+            let accountType = <%- JSON.stringify(accountType) %>;
         </script>
 
       

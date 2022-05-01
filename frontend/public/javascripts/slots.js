@@ -1,27 +1,3 @@
-//loop through availableS lots
-
-
-//data will already be ordered by staff_id
-
-/* 
-for each availableSlot
-    if staff_id seen before
-        add slot to current row in table
-    else
-        create new row in table
-        add slot to current row in table
-        add current staff_id to seen before
-
-*/
-
-//for each availableslot
-//      if staff_id seen before
-//          find index of staff_id in seen_staff
-//          add slot to the row[index]
-//      else
-//          then add new row with staff_name and add current slot to that row
-//          add staff_id to list of seen_staff
-
 //data passed from backend
 console.log(slots);
 
@@ -42,6 +18,7 @@ function showCancelledSlotInformation(slot) {
 
 function confirmSlot(slot) {
     //send POST request to backend
+    console.log(slot);
     fetch('/slots/confirm-slot', {
         method: 'POST',
         headers: {
@@ -53,17 +30,16 @@ function confirmSlot(slot) {
         console.log('received response');
         if (response.status === 201) {
             console.log('response successful');
-            fetch('/calendar');
+            return true;
         }
-
     })
     .catch((error) => {
         console.log('Error:', error);
+        return false;
     });
 
-    // window.location.href = "http://localhost:5000/calendar";
-    // console.log('hi');
-    // fetch('/calendar');
+    //redirect to calendar
+    window.location.href = "http://localhost:5000/calendar";
 }
 
 function confirmSlotBooking(slot) {
@@ -71,8 +47,12 @@ function confirmSlotBooking(slot) {
     if (confirm(`Please confirm your booking \nfrom ${slot.time_start} to ${slot.time_finish} \
                 \nwith ${slot.firstname} ${slot.lastname} \
                 \n(${slot.email})`)) {
-        confirmSlot(slot); //only call ShowConfirmedSlotInformation if POST request successful (no error 404)
-        //showConfirmedSlotInformation(slot);
+        if (confirmSlot(slot)) {    //only call ShowConfirmedSlotInformation if POST request successful (no error 404)
+           showConfirmedSlotInformation(slot); 
+        } else {
+            alert('An error has occured while booking your slot');
+        }
+        
     } else {
         showCancelledSlotInformation(slot);
     }
@@ -91,13 +71,10 @@ function showSlots(slots) {
 
             const slotButton = document.createElement('button');
             slotButton.classList.add('slotButton');
-            slotButton.innerText = `${slot.time_start} to ${slot.time_finish}`;
+            slotButton.innerText = `${slot.date}:\n${slot.time_start} to ${slot.time_finish}`;
             currentData.appendChild(slotButton);
             slotButton.addEventListener('click', () => confirmSlotBooking(slot));
 
-            //daySquare.addEventListener('click', () => openExpandedEventsModal(dayString)); //used for personal events stored in database
-
-            //currentData.innerText = currentData.innerText + `, ${slot.time_start} to ${slot.time_finish}`;
         } else {
             //add new row
             const row = document.createElement('tr');
@@ -109,6 +86,7 @@ function showSlots(slots) {
             const data = document.createElement('td');
             data.id = `js-data-no-${slot.staff_id}`;
             row.appendChild(data);
+
             const slotButton = document.createElement('button');
             slotButton.classList.add('slotButton');
             slotButton.id = `js-slot-button-no-${slot.staff_id}`;
@@ -117,10 +95,20 @@ function showSlots(slots) {
 
             head.innerText = `${slot.firstname} ${slot.lastname}\n${slot.email}`;
             // data.innerText = `${slot.time_start} to ${slot.time_finish}`;
-            slotButton.innerText = `${slot.time_start} to ${slot.time_finish}`;
+            slotButton.innerText = `${slot.date}:\n${slot.time_start} to ${slot.time_finish}`;
             //add staff_id to seen staff array
             seenStaff.push(slot.staff_id);
         }
     });
 
+}
+
+/* Toggle between adding and removing the "responsive" class to topnav when the user clicks on the icon */
+function toggleNav() {
+    var x = document.getElementById("myTopnav");
+    if (x.className === "topnav") {
+        x.className += " responsive";
+    } else {
+        x.className = "topnav";
+    }
 }

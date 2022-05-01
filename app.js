@@ -40,7 +40,6 @@ async function databaseTesting() {
 
     
     //should keep time_id:1 as it's referenced by both slot_id:1 and 6
-    await dbTools.deleteOnlineReservation(8);
 };
 
 //populateDatabase();
@@ -71,30 +70,34 @@ app.get('/calendar', async function (req, res) {
     console.log('/calendar called');
     if (req.session.loggedin) {
     
-            console.log('current username: ' + req.session.username);
-                 
-            let user_id = await dbTools.getUserIdByEmail(req.session.email);
-            console.log(`\n\nUser_id in /calendar is ${user_id.user_id}\n\n`);
+        console.log('current username: ' + req.session.username);
+                
+        let user_id = await dbTools.getUserIdByEmail(req.session.email);
+        console.log(`\n\nUser_id in /calendar is ${user_id.user_id}\n\n`);
 
-            //for use elsewhere in the program when accessing the db (not ac globally accessible - need to fix)
-            req.session.user_id = user_id.user_id;
+        //for use elsewhere in the program when accessing the db (not ac globally accessible - need to fix)
+        req.session.user_id = user_id.user_id;
 
-            let bookedEvents = await dbTools.getBookedEventsByUserId(req.session.user_id);
-            //console.log(bookedEvents);
-            let bookedSlots = await dbTools.getBookedSlotsByUserId(req.session.user_id);
-            //console.log(bookedSlots);
-            let allEvents = bookedEvents.concat(bookedSlots);
-            //sort all events in order of time_start so they can be displayed in order
-            allEvents.sort((a, b) => a.time_start.localeCompare(b.time_start));
-            console.log(allEvents);
+        let bookedEvents = await dbTools.getBookedEventsByUserId(req.session.user_id);
+        //console.log(bookedEvents);
+        let participantEvents = await dbTools.getBookedEventsByParticipantId(req.session.user_id);
+        console.log(participantEvents);
+        let bookedSlots = await dbTools.getBookedSlotsByUserId(req.session.user_id);
+        //console.log(bookedSlots);
+        let allEvents = bookedEvents.concat(bookedSlots);
+        allEvents = allEvents.concat(participantEvents);
+        //sort all events in order of time_start so they can be displayed in order
+        allEvents.sort((a, b) => a.time_start.localeCompare(b.time_start));
+        //console.log(allEvents);
 
-
-            res.render('calendar', {
-                username : req.session.username,
-                bookedEvents : bookedEvents,
-                bookedSlots : bookedSlots,
-                allEvents : allEvents
-            });
+        res.render('calendar', {
+            username : req.session.username,
+            accountType : req.session.type,
+            bookedEvents : bookedEvents,
+            bookedSlots : bookedSlots,
+            participantEvents : participantEvents,
+            allEvents : allEvents
+        });
 
         } else {
             res.redirect('/');
@@ -433,24 +436,23 @@ app.post('/calendar/edit-event', (req, res) => {
 });
 
 //TODO:
-app.delete('/calendar/events/:id', async (req, res) => {
+app.delete('/calendar/reservations/:id', async (req, res) => {
     console.log(`slot_id to delete ${req.params.id}`);
     //remove record from db
     await dbTools.deleteReservation(req.params.id);
 
 
-    //const event = await dbTools.getReservationById(req.params.id);
+    res.status(204).send();
+    res.end();
+    
+});
 
-    //console.log(`event to delete ${JSON.stringify(event)}`);
+app.delete('/calendar/events/:id', async (req, res) => {
+    console.log(`event_id to delete ${req.params.id}`);
+    //remove record from db
+    // await dbTools.deleteEvent(req.params.id);
 
-    // if (event.location_id === 1) {
-    //     await dbTools.deleteOnlineReservation(event.slot_id);
-    // } else if (event.location_id === 2) {
-    //     //don't delete related address record
-    // } else {
-    //     //delete all related records
-    //     //await dbTools.deleteReservation(req.params.id);
-    // }
+    //redirect TODO
     
 });
 
@@ -599,11 +601,12 @@ app.post('/slots/confirm-slot', async (req, res) => {
     console.log('POST /slots/confirm-slot called');
 
     const currentSlot = await dbTools.getReservationById(req.body.slot_id);
-    console.log(currentSlot);
+    console.log(`currentSlot ${JSON.stringify(currentSlot)}`);
 
     //add it to BookedEvents, eventInfo, Locations, addresses, timeinfo, users (host), participations
-    const newEvent = await dbTools.createEventFromReservation('Advisor Meeting', 'A meeting between student and advisor', currentSlot.location_id,
-        currentSlot.time_id, currentSlot.staff_id);
+    const newEvent = await dbTools.createEventFromReservation('Advisor Meeting', `A meeting between you and ${currentSlot.firstname} ${currentSlot.lastname}`, currentSlot.location_id,
+        currentSlot.time_id, currentSlot.user_id);
+
     console.log(`user_id: ${req.session.user_id}`);
     await dbTools.addParticipant(newEvent.lastID, req.session.user_id);
 
