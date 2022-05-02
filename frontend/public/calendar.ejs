@@ -29,26 +29,16 @@
             <a href="javascript:void(0);" class="icon" onclick="toggleNav()">
                 <i class="fa fa-bars"></i>
             </a>
-        </div>
-        
-        
-
-        <!-- <% var test = 101; %>
-        <h2><%= test %></h2> -->
-
-       
+        </div>     
 
 
-        <!--create variable passed from backend so is accessible from calendar.js-->
+        <!--create variableS passed from backend so accessible from calendar.js-->
         <script>
             let personalEvents = <%- JSON.stringify(bookedEvents) %>;
-            console.log(personalEvents);
 
             let bookedSlots = <%- JSON.stringify(bookedSlots) %>;
-            console.log(bookedSlots);
 
             let allEvents = <%- JSON.stringify(allEvents) %>;
-            console.log(allEvents);
 
             let participantEvents = <%- JSON.stringify(participantEvents) %>;
 
@@ -70,8 +60,8 @@
                         <div id="header" class="px-md-5 px-lg-0">
                             <div id="monthDisplay"></div>
                             <div>
-                                <button id="back_button" type="button" class="btn btn-outline-primary">Back</button>
-                                <button id="forward_button" type="button" class="btn btn-outline-primary">Forward</button>
+                                <button id="js-back-button" type="button" class="btn btn-primary">Back</button>
+                                <button id="js-forward-button" type="button" class="btn btn-primary">Forward</button>
                             </div>
 
                         </div>
@@ -278,7 +268,8 @@
 
                     
 
-                    <div id="editEventModal">
+                    <!--DEPRECATED - MAY NEED FOR EDIT EVENT FEATURE-->
+                    <!-- <div id="editEventModal">
                         <h2 id="js-edit-event-title">New Event</h2>
 
                         <form action="/calendar/edit-event" method="POST">
@@ -288,18 +279,20 @@
                             <input type="text" id="event-loc-edit" class="event-input" name="location" placeholder="Location" required/>
                             <input type="email" id="event-participants-edit" class="event-input" name="participants" placeholder="Participants (UEA Email)"/>
                             <input type="time" id="event-start-time-edit" class="event-input" name="start" placeholder="Start Time" required/>
-                            <input type="time" id="event-finish-time-edit" class="event-input" name="end" placeholder="Finish Time" required/>
+                            <input type="time" id="event-finish-time-edit" class="event-input" name="end" placeholder="Finish Time" required/> -->
                             
                             <!-- <label for="event-reminder-checkbox">Email Reminder?</label> -->
                             <!-- <input type="checkbox" id="js-event-reminder-checkbox" class="event-checkbox"/> -->
                             
 
-                            <input id="editButton" type="submit" value="Confirm Edit"></input>
+                            <!-- <input id="editButton" type="submit" value="Confirm Edit"></input>
                             <button id="deleteButton">Delete</button>
                             <button id="cancelButton">Cancel</button>
                         </form>
 
-                    </div>
+                    </div> -->
+
+                    <!--END OF: DEPRECATED - MAY NEED FOR EDIT EVENT FEATURE-->
 
 
                 
@@ -307,41 +300,39 @@
                     <!-- ExpandedviewModal -->
                     <div class="modal fade" id="expandedViewModal" tabindex="-1" aria-labelledby="expandedViewModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                            <h5 class="modal-title" id="expandedViewModalLabel"></h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                            
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="expandedViewModalLabel"></h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+
+                                <div class="modal-body">
                                     <div class="container-fluid" id="expandedViewGrid">
                                         
                                     </div>
+                                </div>
 
-                                
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#createModal">Create New</button>
+                                </div>
                             </div>
-                            <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button id="buttonTest" type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#createModal">Create New</button>
-
-                            </div>
-                        </div>
                         </div>
                     </div>
                     <!--end of expandedViewModal-->
 
-                    <div id="deleteEventModal">
+                    <!-- <div id="deleteEventModal">
                         <h2>Event</h2>
 
-                        <p id="eventText"></p>
+                        <p id="eventText"></p>-->
 
                         <!-- did have id of "deleteButton"-->
-                        <button >Delete</button>
+                        <!--<button >Delete</button>
                         <button id="cancelButton2">Cancel</button>
 
-                    </div>
+                    </div> -->
 
-                    <div id="modalBackDrop"></div>
+                    <!-- <div id="modalBackDrop"></div> -->
 
                 </div>
 

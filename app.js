@@ -81,14 +81,14 @@ app.get('/calendar', async function (req, res) {
         let bookedEvents = await dbTools.getBookedEventsByUserId(req.session.user_id);
         //console.log(bookedEvents);
         let participantEvents = await dbTools.getBookedEventsByParticipantId(req.session.user_id);
-        console.log(participantEvents);
+        //console.log(participantEvents);
         let bookedSlots = await dbTools.getBookedSlotsByUserId(req.session.user_id);
         //console.log(bookedSlots);
         let allEvents = bookedEvents.concat(bookedSlots);
         allEvents = allEvents.concat(participantEvents);
         //sort all events in order of time_start so they can be displayed in order
         allEvents.sort((a, b) => a.time_start.localeCompare(b.time_start));
-        //console.log(allEvents);
+        console.log(allEvents);
 
         res.render('calendar', {
             username : req.session.username,

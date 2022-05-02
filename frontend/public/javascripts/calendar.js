@@ -6,10 +6,10 @@ const calendar = document.getElementById('calendar');
 const newEventModal = document.getElementById('newEventModal');
 const newReservationModal = document.getElementById('newReservationModal');
 const editEventModal = document.getElementById('editEventModal');
-const deleteEventModal = document.getElementById('deleteEventModal');
+//const deleteEventModal = document.getElementById('deleteEventModal');
 const expandedEventsModal = document.getElementById('expandedEventsModal');
 const tabModal = document.getElementById('tabModal');
-const backDrop = document.getElementById('modalBackDrop');
+//const backDrop = document.getElementById('modalBackDrop');
 const bootstrapModal = document.getElementById('bootstrapModal');
 const createModal = new bootstrap.Modal(document.getElementById('createModal'), {});
 const expandedViewGrid = document.getElementById('expandedViewGrid');
@@ -48,6 +48,8 @@ function standardScreenSettings() {
 
 function load() {
 
+    console.log(`nav ${nav}`);
+
     if (window.matchMedia("(min-width: 768px)").matches) {
         standardScreenSettings();
     } else {
@@ -60,24 +62,40 @@ function load() {
         document.getElementById('reservation-tab').disabled = true;
     };
 
+    // THESE ARE ALL CORRECT
     const date = new Date();    //get current date
-    if (nav !== 0) { date.setMonth(new Date().getMonth() + nav); };  //set month to selected month
-    const day = weekdays[date.getDay() % 7 - 1];    //current day
+    console.log(`date ${date}`);
+    if (nav !== 0) {    //set month to selected month
+        date.setMonth(new Date().getMonth() + nav); 
+    };  
+    const day = weekdays[date.getDay() % 7 - 1];    //current day of the selected dd/mm
+    console.log(`day ${day}`);
     const month = months[date.getMonth()];  //current month
+    console.log(`month ${month}`);
     const year = date.getFullYear();    //current year
+    console.log(`year ${year}`);
 
     let monthIndex = date.getMonth(); //feb = 1
-    monthIndex = monthIndex + nav;
+    console.log(`monthIndex ${monthIndex}`);
+    
+    //removed this line as monthIndex is already affected by the value of nav in lines 68-70 in if condition
+    //monthIndex = monthIndex + nav;
+    //console.log(`monthIndex + nav ${monthIndex}`);
 
     //gets the date before the start of next month (i.e. the last date of the current month)
     const daysInMonth = new Date(year, monthIndex+1, 0).getDate();
+    console.log(`daysInMonth ${daysInMonth}`);
     const firstDayOfMonth = new Date(year, monthIndex, 1);    
-    const paddingDays = firstDayOfMonth.getDay() - 1; //-1 due to view starting on monday
+    console.log(`firstDayOfMonth ${firstDayOfMonth}`);
+    // let paddingDays = firstDayOfMonth.getDay() -1; //DEPRECATED
+    const paddingDays = (firstDayOfMonth.getDay() + 6) % 7; //-1 due to view starting on monday
+    console.log(`padding days ${paddingDays}`);
 
     document.getElementById('monthDisplay').innerText = `${date.toLocaleDateString('en-us', { month: 'long'})} ${year}`;
 
     //clear current calendar
     calendar.innerHTML = '';
+
 
     for (let i = 1; i <= paddingDays + daysInMonth; i++) {
         const daySquare = document.createElement('div');
@@ -275,7 +293,6 @@ function openExpandedEventsModal(selectedDate) {
             }
             eventRow.append(eventBtnCol);
 
-            //document.getElementById('buttonTest').addEventListener('resize', openCreateModal(selectedDate));
             document.getElementById('js-new-event-title').innerText = `Create event for ${selectedDate}`;
             document.getElementById('event-date-input').value = selectedDate;
             document.getElementById('js-new-reservation-title').innerText = `Create reservation for ${selectedDate}`;
@@ -360,7 +377,7 @@ function removeEvent(event) {
         },
     }).then(response => {
         console.log('received response');
-        if (response.status === 201) {
+        if (response.status === 204) {
             console.log('response successful');
             fetch('/calendar');
         }
@@ -371,96 +388,81 @@ function removeEvent(event) {
     });
 };
 
-function openNewEventModal(date) {
+// function openNewEventModal(date) {
 
-    newEventModal.style.display = 'block';
+//     newEventModal.style.display = 'block';
     
-    tabModal.style.display = 'block';
+//     tabModal.style.display = 'block';
 
-    backDrop.style.display = 'block';
-    document.getElementById("defaultOpen").click();
+//     backDrop.style.display = 'block';
+//     document.getElementById("defaultOpen").click();
 
-    document.getElementById('js-new-event-title').innerText = `New event for ${date}`;
-    document.getElementById('js-new-reservation-title').innerText = `New reservation for ${date}`;
+//     document.getElementById('js-new-event-title').innerText = `New event for ${date}`;
+//     document.getElementById('js-new-reservation-title').innerText = `New reservation for ${date}`;
 
-    document.getElementById('event-date-input').value = date;
-    document.getElementById('slot-date-input').value = date;
+//     document.getElementById('event-date-input').value = date;
+//     document.getElementById('slot-date-input').value = date;
 
 
-    document.getElementById('createButton').addEventListener('click', closeModal);
-}
+//     document.getElementById('createButton').addEventListener('click', closeModal);
+// }
 
-function openEditEventModal(event) {
+/* may need for future features */
 
-    expandedEventsModal.style.display = 'none';
-    editEventModal.style.display = 'block';
-    document.getElementById('js-edit-event-title').innerText = `Edit event for ${event.date}`;
+// function openEditEventModal(event) {
 
-    //hidden value for the database to reference to update record
-    document.getElementById('event-id-edit').value = event.event_id;
-    //set the new values for updated record
-    document.getElementById('event-title-edit').value = event.title;
-    event.description ? document.getElementById('event-desc-edit').value = event.description : '';
-    document.getElementById('event-loc-edit').value = event.location_id;
-    event.participants ? document.getElementById('event-participants-edit').value = event.participants : '';
-    document.getElementById('event-start-time-edit').value = event.time_start;
-    document.getElementById('event-finish-time-edit').value = event.time_finish;
+//     expandedEventsModal.style.display = 'none';
+//     editEventModal.style.display = 'block';
+//     document.getElementById('js-edit-event-title').innerText = `Edit event for ${event.date}`;
 
-}
+//     //hidden value for the database to reference to update record
+//     document.getElementById('event-id-edit').value = event.event_id;
+//     //set the new values for updated record
+//     document.getElementById('event-title-edit').value = event.title;
+//     event.description ? document.getElementById('event-desc-edit').value = event.description : '';
+//     document.getElementById('event-loc-edit').value = event.location_id;
+//     event.participants ? document.getElementById('event-participants-edit').value = event.participants : '';
+//     document.getElementById('event-start-time-edit').value = event.time_start;
+//     document.getElementById('event-finish-time-edit').value = event.time_finish;
 
-function closeModal() {
-    //eventTitleInput.classList.remove('error');
-    newEventModal.style.display = 'none';
-    newReservationModal.style.display = 'none';
-    deleteEventModal.style.display = 'none';
-    expandedEventsModal.style.display = 'none';
-    tabModal.style.display = 'none';
-    backDrop.style.display = 'none';
-    //eventTitleInput.value = '';
-    clicked = null;
-    console.log('close modal called');
-    load();
-}
+// }
 
-function saveEvent() {
-    if (eventTitleInput.value) {
-        eventTitleInput.classList.remove('error');
+/* end of may need for future features */
 
-        events.push({
-            date: clicked,
-            title: eventTitleInput.value
-        });
+// function closeModal() {
+//     //eventTitleInput.classList.remove('error');
+//     newEventModal.style.display = 'none';
+//     newReservationModal.style.display = 'none';
+//     deleteEventModal.style.display = 'none';
+//     expandedEventsModal.style.display = 'none';
+//     tabModal.style.display = 'none';
+//     backDrop.style.display = 'none';
+//     //eventTitleInput.value = '';
+//     clicked = null;
+//     console.log('close modal called');
+//     load();
+// }
 
-        localStorage.setItem('events', JSON.stringify(events));
-        closeModal();
-    } else {
-        eventTitleInput.classList.add('error');
-    }
-    
-    
-}
-
-function deleteEvent() {
-    //delete current event from storage
-    events = events.filter(e => e.date !== clicked);
-    localStorage.setItem('events', JSON.stringify(events));
-    closeModal();
-}
+// function deleteEvent() {
+//     //delete current event from storage
+//     events = events.filter(e => e.date !== clicked);
+//     localStorage.setItem('events', JSON.stringify(events));
+//     closeModal();
+// }
 
 function initEventListeners() {
-    document.getElementById('forward_button').addEventListener('click', () => {
+    document.getElementById('js-forward-button').addEventListener('click', () => {
         nav++;
         load();
     });
-    document.getElementById('back_button').addEventListener('click', () => {
+    document.getElementById('js-back-button').addEventListener('click', () => {
         nav--;
         load();
     });
-    document.getElementById('cancelButton').addEventListener('click', closeModal);
-    //document.getElementById('saveButton').addEventListener('click', saveEvent);   //deprecated (for local storage only)
-    document.getElementById('cancelButton2').addEventListener('click', closeModal);
-    document.getElementById('deleteButton').addEventListener('click', deleteEvent);
-    backDrop.addEventListener('click', closeModal);
+    // document.getElementById('cancelButton').addEventListener('click', closeModal);
+    // document.getElementById('cancelButton2').addEventListener('click', closeModal);
+    //document.getElementById('deleteButton').addEventListener('click', deleteEvent);
+    // backDrop.addEventListener('click', closeModal);
 
     //event listener for resizing of screen
     window.addEventListener("resize", function() {
@@ -481,30 +483,6 @@ function toggleNav() {
         x.className = "topnav";
     }
 }
-
-// /* tab links */
-// function openForm(evt, formName) {
-//     // Declare all variables
-//     var i, tabcontent, tablinks;
-  
-//     // Get all elements with class="tabcontent" and hide them
-//     tabcontent = document.getElementsByClassName("tabcontent");
-//     for (i = 0; i < tabcontent.length; i++) {
-//       tabcontent[i].style.display = "none";
-//     }
-  
-//     // Get all elements with class="tablinks" and remove the class "active"
-//     tablinks = document.getElementsByClassName("tablinks");
-//     for (i = 0; i < tablinks.length; i++) {
-//       tablinks[i].className = tablinks[i].className.replace(" active", "");
-//     }
-  
-//     // Show the current tab, and add an "active" class to the button that opened the tab
-//     document.getElementById(formName).style.display = "block";
-//     evt.currentTarget.className += " active";
-
-
-//   }
 
 //controls optional location dropdowns in create event form and create reservation form
 function checkIfCustomLocation(form) {

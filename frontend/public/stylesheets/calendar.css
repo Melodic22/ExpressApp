@@ -127,11 +127,6 @@ button {
     display: flex;
     justify-content: space-between;
 }
-
-
-    #header button {
-        background-color: #92a1d1;
-    }
     
 
 #calendar_container {
