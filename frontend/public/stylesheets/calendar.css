@@ -175,6 +175,7 @@ button {
 
 /* my code */
 
+/* when screen is less than 600px wide */
 @media screen and (max-width: 600px) {
     .day {
         height: 100px;
@@ -197,29 +198,63 @@ button {
         background-color: #c8d8e4;
     }
 
-.event, .slot, .confirmedSlot, .participantEvent {
+.event, .slot, .confirmedSlot, .participantEvent, .more-button {
     font-size: 10px;
     padding: 3px;
     color: white;
     border-radius: 5px;
-    max-height: 55px;
+    max-height: 200px;
     overflow: hidden;
+}
+
+/* when screen is less than 600px wide make text disappear for events in calendar view*/
+@media screen and (max-width: 600px) {
+    .event, .slot, .confirmedSlot, .participantEvent {
+        font-size: 0px;
+    }
+
+    .more-button {
+        position: absolute;
+        visibility: hidden;
+    }
+
+}
+
+.hiddenDiv {
+    display: none;
 }
 
 .event {
     background-color: #58bae4;
 }
 
+.expanded-event {
+    border-left: 5px solid #58bae4;
+}
+
 .slot {
     background-color: #bb1592;
+}
+
+.expanded-slot {
+    border-left: 5px solid #bb1592;
 }
 
 .confirmedSlot {
     background-color: #40ca00ad;
 }
 
+.expanded-confirmed-slot {
+    border-left: 5px solid #40ca00ad;
+}
+
 .participantEvent {
     background-color: blue;
+}
+
+.more-button {
+    background-color: black;
+    text-align: center;
 }
 
 .event-expanded {
@@ -387,7 +422,6 @@ button {
 }
 
 .bs-event-expanded {
-    /* border-bottom: 1px solid rgb(145, 145, 145); */
     margin: 30px 0px;
 }
 

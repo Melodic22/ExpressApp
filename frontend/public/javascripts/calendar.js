@@ -1,6 +1,6 @@
 let nav = 0;
-let clicked = null;
-let events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('events')) : [];
+//let clicked = null;
+//let events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('events')) : [];
 
 const calendar = document.getElementById('calendar');
 const newEventModal = document.getElementById('newEventModal');
@@ -30,6 +30,7 @@ function smallScreenSettings() {
     this.document.getElementById('friday').innerText = 'Fri';
     this.document.getElementById('saturday').innerText = 'Sat';
     this.document.getElementById('sunday').innerText = 'Sun';
+
     
 }
 
@@ -77,7 +78,7 @@ function load() {
 
     let monthIndex = date.getMonth(); //feb = 1
     console.log(`monthIndex ${monthIndex}`);
-    
+
     //removed this line as monthIndex is already affected by the value of nav in lines 68-70 in if condition
     //monthIndex = monthIndex + nav;
     //console.log(`monthIndex + nav ${monthIndex}`);
@@ -115,31 +116,92 @@ function load() {
                 daySquare.id = 'currentDay';
             }
 
+            var moreButton = document.createElement('div');
+            // moreButton.classList += 'btn btn-dark btn-sm'; 
+            moreButton.classList += 'more-button'
+            moreButton.style.display = 'none';
+            console.log(`button display set to none`);
+
+
             //new code
             allEvents.forEach(function(event) {
+
+
+
                 if (event.date === dayString) {
-                    if (event.title) {  //if is event (not reservation)
+                    
+                    let eventCount = daySquare.childElementCount + 1;
+                    console.log(`eventCount ${eventCount}`);
 
-                        const eventDiv = document.createElement('div');
-                        if (event.title === 'Advisor Meeting') {
-                            eventDiv.classList.add('confirmedSlot');
-                        } else {
-                            eventDiv.classList.add('event');
+                    const eventDiv = document.createElement('div');
+
+
+
+                    if (eventCount === 5) {
+                        console.log(`eventCount = 5`);
+                        // eventDiv.classList += ' compact';
+                        //create button called "x more" which loads expanded view
+                        
+                                             
+                        console.log(`button display set to block`);
+                        moreButton.innerText = `${eventCount-4} more...`;
+                        moreButton.style.display = 'block';
+                        const hiddenDiv = document.createElement('div');
+                        hiddenDiv.classList += 'hiddenDiv';
+                        daySquare.append(hiddenDiv);
+                        
+
+                    } else if (eventCount > 5) {
+                        const hiddenDiv = document.createElement('div');
+                        daySquare.append(hiddenDiv);
+                        hiddenDiv.classList += 'hiddenDiv';
+                        console.log(`event count is more than 5`);
+                        moreButton.innerText = `${eventCount-4} more...`;    
+                        console.log(`button display set to block`);
+                        moreButton.style.display = 'block';                  
+                    } 
+                    
+                    else if (eventCount < 5) {
+                        console.log(`eventCount is less than 5`);
+                        if (event.title) {  //if is event (not reservation)
+
+                            //const eventDiv = document.createElement('div');
+                            if (event.title === 'Advisor Meeting') {
+                                eventDiv.classList.add('confirmedSlot');
+                            } else {
+                                eventDiv.classList.add('event');
+                            }                            
+                            eventDiv.innerText = `${event.title}: ${event.time_start} to ${event.time_finish}`;
+    
+                            
+                            daySquare.appendChild(eventDiv);
+    
                         }
-                        eventDiv.innerText = `${event.title}: ${event.time_start} to ${event.time_finish}`;
-                        daySquare.appendChild(eventDiv);
-
+    
+                        if (event.slot_id) {    //if is a reservation
+    
+                            //const eventDiv = document.createElement('div');
+                            eventDiv.classList.add('slot');
+                            eventDiv.innerText = `Reserved Slot: ${event.time_start} to ${event.time_finish}`;
+                            daySquare.appendChild(eventDiv);
+    
+                            if (window.matchMedia("(min-width: 768px)").matches) {
+                            
+                            } else {
+                                console.log(`hi`);
+                                eventDiv.className += ' compact';
+                            }
+                        }
                     }
 
-                    if (event.slot_id) {
+                    
 
-                        const eventDiv = document.createElement('div');
-                        eventDiv.classList.add('slot');
-                        eventDiv.innerText = `Reserved Slot: ${event.time_start} to ${event.time_finish}`;
-                        daySquare.appendChild(eventDiv);
-                    }
+
+
                 }
             });
+
+            daySquare.append(moreButton);
 
             //if there is a personal event in the database
             // personalEvents.forEach(function(event) {
@@ -259,6 +321,7 @@ function openExpandedEventsModal(selectedDate) {
             console.log(event);
             if (event.slot_id) {
 
+                eventRow.classList += ' expanded-slot';
                 //display reservation details
                 var eventSummary = `Reserved Slot: ${event.time_start}-${event.time_finish}`;
                 if (event.location_id === 1) {
@@ -276,10 +339,21 @@ function openExpandedEventsModal(selectedDate) {
                 
                 //TODO: change participants_id to find the name of the participant and display whether they've accepted
                 eventBtnCol.addEventListener('click', () => {
-                    removeReservation(event);
+                    
+                    if (confirm("Are you sure you want to delete this event?")) {
+                        removeReservation(event);
+                    };
+
                 });
             } else if (event.event_id) {
 
+                if (event.title === "Advisor Meeting") {
+                    eventRow.classList += ' expanded-confirmed-slot';
+                } else {
+                    eventRow.classList += ' expanded-event';
+                }
+
+                
                 //display event details
                 var eventSummary = `${event.title}: ${event.time_start}-${event.time_finish}`;
                 if (event.description) {    eventSummary = eventSummary.concat(`\nDescription: ${event.description}`);     }

@@ -66,6 +66,10 @@ app.set('views', __dirname + '/frontend/public');
 //specify the view engine
 app.set('view engine', 'ejs');
 
+
+
+/* start of routes */
+
 app.get('/calendar', async function (req, res) {
     console.log('/calendar called');
     if (req.session.loggedin) {
@@ -88,7 +92,7 @@ app.get('/calendar', async function (req, res) {
         allEvents = allEvents.concat(participantEvents);
         //sort all events in order of time_start so they can be displayed in order
         allEvents.sort((a, b) => a.time_start.localeCompare(b.time_start));
-        console.log(allEvents);
+        //console.log(allEvents);
 
         res.render('calendar', {
             username : req.session.username,
@@ -167,6 +171,7 @@ app.post('/login', async (req, res) => {
 
             //redirect
             res.redirect('/calendar');
+
         } else {
             let studentAccount = await dbTools.getStudentByEmailPassword(email, password);
 
@@ -183,6 +188,7 @@ app.post('/login', async (req, res) => {
 
                 //redirect
                 res.redirect('/calendar');
+
             } else {
                 //invalid user
                 res.render('login', {
@@ -403,6 +409,7 @@ app.post('/calendar/create-event', async (req, res) => {
     }
 
     res.redirect('/calendar'); 
+    //res.status(201).end();
 
 });
 
