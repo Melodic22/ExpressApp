@@ -2,6 +2,11 @@
 PRAGMA foreign_keys = ON;
 --PRAGMA FOREIGN_keys;
 
+-- SELECT location_id FROM BookingSlots WHERE location_id = 7;
+
+UPDATE Participations SET participation_type_id = 2 WHERE event_id = 26 and participant_id = 4;
+-- UPDATE Participations SET participation_type_id = 2;
+
 -- DROP TABLE Students;
 -- DROP TABLE Staff;
 
@@ -15,28 +20,6 @@ PRAGMA foreign_keys = ON;
 -- DROP TABLE EventInfo;
 -- DROP TABLE Locations;
 -- DROP TABLE Addresses;
-
-SELECT b.event_id, b.host_id, b.time_id, t.date, t.time_start, t.time_finish, e.title, e.description, e.location_id, 
-                            l.location_name, l.location_building, l.location_room, l.address_id, a.line_1, a.line_2, a.line_3, a.city, a.county, a.postcode, a.country, 
-                            p.participant_id, pt.participation_type_id, pt.participation_type_name 
-                        FROM BookedEvents as b 
-                            INNER JOIN TimeInfo as t 
-                                ON b.time_id = t.time_id 
-                            INNER JOIN EventInfo as e 
-                                ON e.event_id = b.event_id 
-                            LEFT OUTER JOIN Participations as p 
-                                ON b.event_id = p.event_id 
-                            LEFT OUTER JOIN ParticipationType as pt 
-                                ON pt.participation_type_id = p.participation_type_id 
-                            LEFT OUTER JOIN Locations as l 
-                                ON e.location_id = l.location_id 
-                            LEFT OUTER JOIN Addresses as a 
-                                ON l.address_id = a.address_id 
-                            WHERE p.participant_id = 1;
-
--- INSERT INTO BookingSlots VALUES (1, 2, 3, 4);
--- INSERT INTO TimeInfo VALUES (1, '25/11/2000', '15:34', '14,35');
--- INSERT OR IGNORE INTO TimeInfo VALUES (2, '25/11/2000', '15:34', '14,35');
 
 
 

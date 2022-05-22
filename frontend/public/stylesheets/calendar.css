@@ -205,6 +205,7 @@ button {
     border-radius: 5px;
     max-height: 200px;
     overflow: hidden;
+    font-family: sans-serif;
 }
 
 /* when screen is less than 600px wide make text disappear for events in calendar view*/
@@ -435,5 +436,9 @@ button {
 
 #event-btn-delete, #event-btn-edit {
     display: none;
+}
+
+#check-credentials-form {
+    max-width: 50%;
 }
 

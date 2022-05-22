@@ -5,45 +5,23 @@ const session = require('express-session');
 const path = require('path');
 const sqlite3 = require('sqlite3');
 const { response } = require('express');
-const dbTools = require("./frontend/public/javascripts/dbTools");
+const dbTools = require("./javascripts/dbTools");
+const encryption = require("./javascripts/encryption");
+const crypto = require('crypto');
+const sendMail = require('./javascripts/email');
 
 // Creating express object
 const app = express();
 
-const db = new sqlite3.Database('./db.sqlite3');
+//const db = new sqlite3.Database('./db.sqlite3');
+const db = dbTools.getDatabase();
 //enable foreign keys
 
 async function populateDatabase() {
 
-    // db.serialize(() => {
-    //     db.run("PRAGMA foreign_keys = ON");
-    //     db.run("INSERT INTO BookingSlots VALUES (1, 2, 3, 4)");
-    
-    // });
-
-    // await dbTools.test();
-
-    //db.run("INSERT INTO BookingSlots VALUES (1, 2, 3, 4)");
-
-    //create online reservations
-    await dbTools.createReservation('30/04/2022', '16:45', '17:45', 1, 1);
-    await dbTools.createReservation('29/04/2022', '15:45', '17:45', 1, 1);
-    await dbTools.createReservation('28/04/2022', '15:45', '17:45', 1, 2);
-    await dbTools.createReservation('27/04/2022', '16:45', '17:45', 1, 2);
-    await dbTools.createReservation('26/04/2022', '14:45', '16:00', 1, 2);
-
-    //duplicate time entry, slot_id:1 and slot_id:6 should both reference time_id 1
-    await dbTools.createReservation('30/04/2022', '16:45', '17:45', 1, 1);
+    await dbTools.populate();
 };
-
-async function databaseTesting() {
-
-    
-    //should keep time_id:1 as it's referenced by both slot_id:1 and 6
-};
-
-//populateDatabase();
-//databaseTesting();
+populateDatabase();
 
 //app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static("frontend/public"));
@@ -74,10 +52,10 @@ app.get('/calendar', async function (req, res) {
     console.log('/calendar called');
     if (req.session.loggedin) {
     
-        console.log('current username: ' + req.session.username);
+        //console.log('current username: ' + req.session.username);
                 
         let user_id = await dbTools.getUserIdByEmail(req.session.email);
-        console.log(`\n\nUser_id in /calendar is ${user_id.user_id}\n\n`);
+        //console.log(`\n\nUser_id in /calendar is ${user_id.user_id}\n\n`);
 
         //for use elsewhere in the program when accessing the db (not ac globally accessible - need to fix)
         req.session.user_id = user_id.user_id;
@@ -92,9 +70,10 @@ app.get('/calendar', async function (req, res) {
         allEvents = allEvents.concat(participantEvents);
         //sort all events in order of time_start so they can be displayed in order
         allEvents.sort((a, b) => a.time_start.localeCompare(b.time_start));
-        //console.log(allEvents);
+        console.log(allEvents);
 
         res.render('calendar', {
+            user_id : req.session.user_id,
             username : req.session.username,
             accountType : req.session.type,
             bookedEvents : bookedEvents,
@@ -149,53 +128,67 @@ app.post('/login', async (req, res) => {
     let email = req.body.email;
     let password = req.body.password;
 
-    //temp validation
+    //if email and password are not null
     if (email && password) {
         console.log('email and password inputs registered');
-        // res.sendFile(path.join(__dirname, 'frontend/public/calendar.html'));
-        //db.get("SELECT * FROM Users WHERE email = ? AND password = ?", [email, password], (error, results, fields) => {
 
-        //new code
-        let staffAccount = await dbTools.getStaffByEmailPassword(email, password);
+        //new
+        const accountExists = await dbTools.getUserByEmail(email);
+        if (accountExists) {
 
-        //user is a staff member
-        if (staffAccount) {
-            console.log('staff member found');
-        
-            req.session.type = 'staff';
-            req.session.loggedin = true;
-            req.session.user_id = staffAccount.user_id;
-            req.session.username = staffAccount.firstname;
-            req.session.lastname = staffAccount.lastname;
-            req.session.email = staffAccount.email;
-
-            //redirect
-            res.redirect('/calendar');
-
-        } else {
-            let studentAccount = await dbTools.getStudentByEmailPassword(email, password);
-
-            //user is a student member
-            if (studentAccount) {
-                console.log('student member found');
-
-                req.session.type = 'student';
-                req.session.loggedin = true;
-                req.session.user_id = studentAccount.user_id;
-                req.session.username = studentAccount.firstname;
-                req.session.lastname = studentAccount.lastname;
-                req.session.email = studentAccount.email;
-
+            const password_salt = accountExists.password_salt;
+            console.log(password_salt);
+            //calculate password hash using salt
+            const calculatedHash = await encryption.hashPassword(password, password_salt)
+            console.log(calculatedHash);
+    
+            //if valid email and password
+            if (calculatedHash === accountExists.password_hash) {
+                console.log('valid user');
+    
+                const staffAccount = await dbTools.getStaffByEmail(email);
+                const studentAccount = await dbTools.getStudentByEmail(email);
+    
+                if (staffAccount) {
+                    req.session.type = 'staff';
+                    req.session.loggedin = true;
+                    req.session.user_id = staffAccount.user_id;
+                    req.session.username = staffAccount.firstname;
+                    req.session.lastname = staffAccount.lastname;
+                    req.session.email = staffAccount.email;
+                } 
+                else if (studentAccount) {
+                    req.session.type = 'student';   
+                    req.session.loggedin = true;
+                    req.session.user_id = studentAccount.user_id;
+                    req.session.username = studentAccount.firstname;
+                    req.session.lastname = studentAccount.lastname;
+                    req.session.email = studentAccount.email;  
+                } else {
+                    //user does not belong to either student or staff table
+                    console.log('Error: User does not exist as a student or staff member');
+    
+                    res.render('login', {
+                        // message : 'There was an error. Please try again'
+                        message : 'Email and/or password incorrect. Please try again.'
+                    });
+                }
+    
                 //redirect
                 res.redirect('/calendar');
-
+    
             } else {
-                //invalid user
                 res.render('login', {
                     message : 'Email and/or password incorrect. Please try again.'
                 });
             }
+
+        } else {
+            res.render('login', {
+                message : 'Email and/or password incorrect. Please try again.'
+            });
         }
+        
 
     } else {
         //no valid credentials were inputted
@@ -205,78 +198,6 @@ app.post('/login', async (req, res) => {
         });
         res.end();     
     };
-
-
-
-        //end of new code
-
-        //check for staff user
-    //     db.get("SELECT * \
-    //             FROM Users AS u \
-    //             INNER JOIN Staff AS s \
-    //             ON u.user_id = s.user_id \
-    //             WHERE u.email = ? AND u.password = ?", [email, password], (error, results, fields) => {
-    //         if (error) {
-    //             console.log(error);
-    //         } else {
-                
-    //             if (results) {
-    //                 console.log('staff member found');
-    //                 //staff user
-    //                 req.session.type = 'staff';
-    //                 //valid user credentials
-    //                 console.log(`results: ${JSON.stringify(results)}`);
-    //                 req.session.loggedin = true;
-    //                 req.session.user_id = results.user_id;
-    //                 req.session.username = results.firstname;
-    //                 req.session.email = results.email;
-
-    //                 //redirect
-    //                 res.redirect('/calendar');
-
-    //             } else {
-    //                 //check for student user
-    //                 db.get("SELECT * \
-    //                         FROM Users AS u \
-    //                         INNER JOIN Students AS s \
-    //                         ON u.user_id = s.user_id \
-    //                         WHERE u.email = ? AND u.password = ?", [email, password], (error, results, fields) => {
-
-    //                     if (error) {
-    //                         console.log(error);
-    //                     } 
-    //                     else if (results) {
-    //                         console.log('student member found');
-    //                         //student user
-    //                         req.session.type = 'student';
-    //                         //valid user credentials
-    //                         console.log(`results: ${JSON.stringify(results)}`);
-    //                         req.session.loggedin = true;
-    //                         req.session.user_id = results.user_id;
-    //                         req.session.username = results.firstname;
-    //                         req.session.email = results.email;
-
-    //                         //redirect
-    //                         res.redirect('/calendar');
-    //                     } else {
-    //                         //invalid user
-    //                         res.render('login', {
-    //                             message : 'Email and/or password incorrect. Please try again.'
-    //                         });
-    //                     }
-    //                 });
-    //             }
-
-    //         }
-    //     });        
-    // } else {
-    //     //no valid credentials were inputted
-    //     console.log('default render');
-    //     res.render('login', {
-    //         message : ''
-    //     });
-    //     res.end();     
-    // };
 });
 
 //create account route
@@ -297,7 +218,14 @@ app.post('/signup', async (req, res) => {
     let userExists = await dbTools.getUserIdByEmail(email);
     if (!userExists) {
 
-        let newUser = await dbTools.createUser(fname, lname, email, password);
+        //add password hash and salt
+        let salt = crypto.pseudoRandomBytes(24).toString('hex');
+        console.log(salt);
+        let hash = await encryption.hashPassword(password, salt)
+        console.log(hash);
+
+        const newUser = await dbTools.createUser(fname, lname, email, hash, salt);
+        // let newUser = await dbTools.createUser(fname, lname, email, password);
         if (newUser.error) {
             console.log(error);
         } else {
@@ -314,11 +242,15 @@ app.post('/signup', async (req, res) => {
         req.session.username = fname;
         req.session.lastname = lname;
         req.session.email = email;
+        req.session.type = type;
         res.redirect('/calendar');   
     } else {    //account already exists
         //TEMP: NEEDS TO DISPLAY ERROR MESSAGE SAYING EMAIL ALREADY IN USE
         console.log('account already exists');
-        res.redirect('/');
+        res.render('login', {
+            message : 'That email is already in use. Please try again.'
+        });
+        //res.redirect('/');
     }   
 
 });
@@ -404,14 +336,95 @@ app.post('/calendar/create-event', async (req, res) => {
     }
 
     if (participants) { //works for 1 participant only
-        const participant_id = await dbTools.getUserIdByEmail(participants);
-        await dbTools.inviteParticipant(newEvent.lastID, participant_id.user_id);
+        
+        //split the participants list into single emails
+        const participantsList = participants.split(", ");
+        console.log(participantsList);
+
+        for (let i = 0; i < participantsList.length; i++) {
+            console.log(participantsList[i]);
+            const participant = await dbTools.getUserByEmail(participantsList[i]);
+            await dbTools.inviteParticipant(newEvent.lastID, participant.user_id);
+
+            //email sent to pending participant
+            const email = await sendMail.emailConstructor(req.session.username, req.session.lastname, participant.firstname, participant.lastname, newEvent.lastID);
+
+            sendMail.sendMail(email, participantsList[i]);
+            //sendMail.sendMail(email, 'mattreid22@btopenworld.com');
+
+        };
+
     }
 
     res.redirect('/calendar'); 
     //res.status(201).end();
 
 });
+
+app.get('/confirm-attendance/:id', async (req, res) => {
+
+    const event_id = req.params.id;
+    console.log(event_id);
+
+    res.render('credentialCheck', {
+        message : '',
+        event_id : event_id
+    });
+});
+
+app.post('/confirm-attendance', async (req, res) => {
+
+    //take in login details
+    const event_id = req.body.event_id;
+    const email = req.body.email;
+    const password = req.body.password;
+    const attendance = req.body.attendance;
+    console.log(event_id);
+
+    //if email and password are not null
+    if (email && password) {
+        const accountExists = await dbTools.getUserByEmail(email);
+        if (accountExists) {
+            const password_salt = accountExists.password_salt;
+            const calculatedHash = await encryption.hashPassword(password, password_salt)
+            //if valid email and password
+            if (calculatedHash === accountExists.password_hash) {
+                console.log('valid user');
+
+                if (attendance === 'true') {
+
+                    await dbTools.updateParticipantType(event_id, accountExists.user_id, 3);
+                    res.send('<h2>Your attendance for this event has been confirmed.</h2>');
+                } else {
+
+                    await dbTools.updateParticipantType(event_id, accountExists.user_id, 1);
+                    res.send('<h2>Your decision has been registered. Thanks!</h2>');
+                }
+
+            } else {
+                res.render('credentialCheck', {
+                    message : 'Email and/or password incorrect. Please try again.',
+                    event_id : event_id
+                });
+            }
+        } else {
+            res.render('credentialCheck', {
+                message : 'Email and/or password incorrect. Please try again.',
+                event_id : event_id
+            });     
+        }
+    } else {
+        //no valid credentials were inputted
+        console.log('default render');
+        res.render('credentialCheck', {
+            message : '',
+            event_id : event_id
+        });
+        res.end();     
+    };
+})
+
+
 
                 
 app.post('/calendar/edit-event', (req, res) => {
@@ -446,20 +459,30 @@ app.post('/calendar/edit-event', (req, res) => {
 app.delete('/calendar/reservations/:id', async (req, res) => {
     console.log(`slot_id to delete ${req.params.id}`);
     //remove record from db
-    await dbTools.deleteReservation(req.params.id);
+    const deleted = await dbTools.deleteReservation(req.params.id);
 
-
-    res.status(204).send();
+    if (deleted === true) {
+        res.status(204).send();
+    } else {
+        res.status(500).send();
+    }
     res.end();
+
     
 });
 
 app.delete('/calendar/events/:id', async (req, res) => {
     console.log(`event_id to delete ${req.params.id}`);
     //remove record from db
-    // await dbTools.deleteEvent(req.params.id);
+    const deleted = await dbTools.deleteEvent(req.params.id);
 
-    //redirect TODO
+    if (deleted === true) {
+        res.status(204).send();
+    } else {
+        res.status(500).send();
+    }
+    res.end();
+
     
 });
 
@@ -622,7 +645,6 @@ app.post('/slots/confirm-slot', async (req, res) => {
 
     
     //send confirmation emails to both users
-    const sendMail = require('./frontend/public/javascripts/email.js')
 
     //email sent to student
     let email = `Dear ${req.session.username} ${req.session.lastname}, <br>\

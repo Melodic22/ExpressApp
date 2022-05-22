@@ -1,3 +1,5 @@
+PRAGMA foreign_keys = ON;
+
 CREATE TABLE IF NOT EXISTS Students (
     student_id INTEGER PRIMARY KEY,
     user_id INTEGER NOT NULL,
@@ -15,7 +17,8 @@ CREATE TABLE IF NOT EXISTS Users (
     firstname TEXT NOT NULL, 
     lastname TEXT NOT NULL, 
     email TEXT NOT NULL UNIQUE, 
-    password TEXT NOT NULL
+    password_hash TEXT NOT NULL,
+    password_salt TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS EventInfo (
@@ -96,32 +99,9 @@ CREATE TABLE IF NOT EXISTS Addresses (
 );
 
 --initialise premade locations and participation types
-INSERT INTO Locations VALUES (1, 'Online', null, null, null);
-INSERT INTO Addresses VALUES (1, 'University of East Anglia', 'Norwich Research Park', null, 'Norwich', 'Norfolk', 'NR4 7TJ', 'United Kingdom');
--- --INSERT INTO Locations VALUES (2, 'Unversity of East Anglia', 1); --has to now also have a building and room number
-INSERT INTO ParticipationType VALUES (1, 'null');
-INSERT INTO ParticipationType VALUES (2, 'invited');
-INSERT INTO ParticipationType VALUES (3, 'confirmed');
-
-
-
--- INSERT INTO accounts VALUES (1, 'Matt', 'Reid', 'matt@matt.com', 'pass');
--- INSERT INTO accounts VALUES (2, 'Em', 'Elliott', 'em@em.com', 'pass');
-
--- SELECT * FROM ACCOUNTS;
-
--- INSERT INTO RESERVATIONS VALUES (1, 1, '19/04/2022', '09:00', '09:15');
--- INSERT INTO RESERVATIONS VALUES (2, 2, '19/04/2022', '10:00', '10:15');
-
--- SELECT * FROM RESERVATIONS;
-
--- INSERT INTO MEETINGS VALUES (1, 1, 'Matt, Deepesh', 'Advisor Meeting', '');
-
-
-
--- SELECT *
--- FROM reservations AS e
---     INNER JOIN meetings AS m
---     ON e.res_id = m.res_id;
-    
+INSERT OR IGNORE INTO Locations VALUES (1, 'Online', null, null, null);
+INSERT OR IGNORE INTO Addresses VALUES (1, 'University of East Anglia', 'Norwich Research Park', null, 'Norwich', 'Norfolk', 'NR4 7TJ', 'United Kingdom');
+INSERT OR IGNORE INTO ParticipationType VALUES (1, 'null');
+INSERT OR IGNORE INTO ParticipationType VALUES (2, 'invited');
+INSERT OR IGNORE INTO ParticipationType VALUES (3, 'confirmed');
     

@@ -48,7 +48,7 @@ function standardScreenSettings() {
 };
 
 function load() {
-
+    console.log("\n\n\nload called");
     console.log(`nav ${nav}`);
 
     if (window.matchMedia("(min-width: 768px)").matches) {
@@ -193,52 +193,10 @@ function load() {
                             }
                         }
                     }
-
-                    
-
-
-
                 }
             });
 
             daySquare.append(moreButton);
-
-            //if there is a personal event in the database
-            // personalEvents.forEach(function(event) {
-            //     console.log(event.date);
-            //     if (event.date === dayString) {
-            //         //temp display
-            //         const eventDiv = document.createElement('div');
-            //         if (event.title === 'Advisor Meeting') {
-            //             eventDiv.classList.add('confirmedSlot');
-            //         } else {
-            //             eventDiv.classList.add('event');
-            //         }
-            //         eventDiv.innerText = `${event.title}: ${event.time_start} to ${event.time_finish}`;
-            //         daySquare.appendChild(eventDiv);
-
-            //         //eventDiv.addEventListener('click', () => openExpandedEventModal(event));
-            //     }
-            // });
-
-            // //if there is any reserved slots in the database
-            // bookedSlots.forEach(function(slot) {
-            //     if (slot.date === dayString) {
-            //         const eventDiv = document.createElement('div');
-            //         eventDiv.classList.add('slot');
-            //         eventDiv.innerText = `Reserved Slot: ${slot.time_start} to ${slot.time_finish}`;
-            //         daySquare.appendChild(eventDiv);
-            //     }
-            // });
-
-            // participantEvents.forEach(function(partEvent) {
-            //     if (partEvent.date === dayString) {
-            //         const eventDiv = document.createElement('div');
-            //         eventDiv.classList.add('participantEvent');
-            //         eventDiv.innerText = `Guest Event: ${partEvent.time_start} to ${partEvent.time_finish}`;
-            //         daySquare.appendChild(eventDiv);
-            //     }
-            // });
 
             daySquare.addEventListener('click', () => openExpandedEventsModal(dayString)); //used for personal events stored in database
 
@@ -271,20 +229,6 @@ function openExpandedEventsModal(selectedDate) {
     allEvents.forEach(function(event) {
         if (event.date === selectedDate) {
             events = true;
-
-            //add display element for event
-            // const eventDiv = document.createElement('div');
-            // eventDiv.classList.add('event-expanded');
-            // console.log(event);
-            
-            
-            // //construct eventDiv text depending on optional values
-            // let eventSummary = `${event.title}: ${event.time_start}-${event.time_finish}`;
-            // if (event.description) {    eventSummary = eventSummary.concat(`\nDescription: ${event.description}`);     }
-            // //TODO: change participants_id to find the name of the participant and display whether they've accepted
-            // if (event.participant_id) {   eventSummary = eventSummary.concat(`\nParticipants: ${event.participant_id}`);    }
-            // eventDiv.innerText = eventSummary;
-            // expandedEventsModal.append(eventDiv);
             
             //to edit/delete an event
             //eventDiv.addEventListener('click', () => openEditEventModal(event)); //TODO: add this
@@ -324,27 +268,9 @@ function openExpandedEventsModal(selectedDate) {
                 eventRow.classList += ' expanded-slot';
                 //display reservation details
                 var eventSummary = `Reserved Slot: ${event.time_start}-${event.time_finish}`;
-                if (event.location_id === 1) {
-                    eventSummary = eventSummary.concat(`\nLocation: ${event.location_name}`);
-                } else if (event.location_name === 'UEA Campus') {
-                    eventSummary = eventSummary.concat(`\nLocation: ${event.location_name}, ${event.location_building}, Room ${event.location_room}`);
-                } else {
-                    //replacing null address values with ''
-                    const line2 = event.line_2 === '' ? '' : `${event.line_2},`
-                    const line3 = event.line_3 === '' ? '' : `${event.line_3},`
-                    const county = event.county === '' ? '' : `${event.county},`
-                    const country = event.country === '' ? '' : `${event.country}`
-                    eventSummary = eventSummary.concat(`\nLocation: ${event.line_1}, ${line2} ${line3} ${event.city}, ${county} ${event.postcode}, ${country}`);
-                }
                 
                 //TODO: change participants_id to find the name of the participant and display whether they've accepted
-                eventBtnCol.addEventListener('click', () => {
-                    
-                    if (confirm("Are you sure you want to delete this event?")) {
-                        removeReservation(event);
-                    };
 
-                });
             } else if (event.event_id) {
 
                 if (event.title === "Advisor Meeting") {
@@ -357,14 +283,40 @@ function openExpandedEventsModal(selectedDate) {
                 //display event details
                 var eventSummary = `${event.title}: ${event.time_start}-${event.time_finish}`;
                 if (event.description) {    eventSummary = eventSummary.concat(`\nDescription: ${event.description}`);     }
-                //TODO: change participants_id to find the name of the participant and display whether they've accepted
-                if (event.participant_id) {   eventSummary = eventSummary.concat(`\nParticipants: ${event.participant_id}`);    }
 
-                eventBtnCol.addEventListener('click', () => {
-                    console.log('remove event');
-                    removeEvent(event);
-                });  
+
             }
+
+            //construct location display message
+            if (event.location_id === 1) {
+                eventSummary = eventSummary.concat(`\nLocation: ${event.location_name}`);
+            } else if (event.location_name === 'UEA Campus') {
+                eventSummary = eventSummary.concat(`\nLocation: ${event.location_name}, ${event.location_building}, Room ${event.location_room}`);
+            } else {
+                //replacing null address values with ''
+                const line2 = event.line_2 === '' ? '' : `${event.line_2},`
+                const line3 = event.line_3 === '' ? '' : `${event.line_3},`
+                const county = event.county === '' ? '' : `${event.county},`
+                const country = event.country === '' ? '' : `${event.country}`
+                eventSummary = eventSummary.concat(`\nLocation: ${event.line_1}, ${line2} ${line3} ${event.city}, ${county} ${event.postcode}, ${country}`);
+            }
+
+            //add event listener for the delete button
+            eventBtnCol.addEventListener('click', () => {
+
+                if (event.host_id === user_id) {
+                    if (confirm("Are you sure you want to delete this event?")) {
+                        console.log('remove event');
+                        removeEvent(event);
+                    };
+                } else {
+                    alert("Sorry, you can't delete this event as you're not the host.");
+                }
+
+
+
+            });  
+
             eventRow.append(eventBtnCol);
 
             document.getElementById('js-new-event-title').innerText = `Create event for ${selectedDate}`;
@@ -421,108 +373,39 @@ function openCreateModal(selectedDate) {
     createModal.show();
 }
 
-function removeReservation(event) {
-    //send delete request to delete event data
-    fetch('/calendar/reservations/' + event.slot_id, {
-        method: 'DELETE',
-        headers: {
-            'Accept' : 'application/json',
-            'Content-Type': 'application/json'
-        },
-    }).then(response => {
-        console.log('received response');
-        if (response.status === 204) {
-            console.log('response successful');
-        }
-    }).catch((error) => {
-        console.log('Error:', error);
-    });
-
-    window.location.href = "http://localhost:5000/calendar";
-};
-
 function removeEvent(event) {
+
+    //create url depending on if event is an event or a reservation
+    let url = '';
+    if (event.event_id) {
+        url = '/calendar/events/' + event.event_id;
+    }
+    else if (event.slot_id) {
+        url = '/calendar/reservations/' + event.slot_id;
+    }
+
     //send delete request to delete event data
-    fetch('/calendar/events/' + event.event_id, {
+    fetch(url, {
         method: 'DELETE',
         headers: {
             'Accept' : 'application/json',
             'Content-Type': 'application/json'
         },
     }).then(response => {
-        console.log('received response');
         if (response.status === 204) {
-            console.log('response successful');
-            fetch('/calendar');
+            window.location.href = "http://localhost:5000/calendar";
         }
-
+        if (response.status === 500) {
+            alert("Oops. There was an error while deleting that event. Please try again.")
+        }
     })
     .catch((error) => {
-        console.log('Error:', error);
+        console.log(`Error deleting at ${url}: `, error);
     });
+    
+    
 };
 
-// function openNewEventModal(date) {
-
-//     newEventModal.style.display = 'block';
-    
-//     tabModal.style.display = 'block';
-
-//     backDrop.style.display = 'block';
-//     document.getElementById("defaultOpen").click();
-
-//     document.getElementById('js-new-event-title').innerText = `New event for ${date}`;
-//     document.getElementById('js-new-reservation-title').innerText = `New reservation for ${date}`;
-
-//     document.getElementById('event-date-input').value = date;
-//     document.getElementById('slot-date-input').value = date;
-
-
-//     document.getElementById('createButton').addEventListener('click', closeModal);
-// }
-
-/* may need for future features */
-
-// function openEditEventModal(event) {
-
-//     expandedEventsModal.style.display = 'none';
-//     editEventModal.style.display = 'block';
-//     document.getElementById('js-edit-event-title').innerText = `Edit event for ${event.date}`;
-
-//     //hidden value for the database to reference to update record
-//     document.getElementById('event-id-edit').value = event.event_id;
-//     //set the new values for updated record
-//     document.getElementById('event-title-edit').value = event.title;
-//     event.description ? document.getElementById('event-desc-edit').value = event.description : '';
-//     document.getElementById('event-loc-edit').value = event.location_id;
-//     event.participants ? document.getElementById('event-participants-edit').value = event.participants : '';
-//     document.getElementById('event-start-time-edit').value = event.time_start;
-//     document.getElementById('event-finish-time-edit').value = event.time_finish;
-
-// }
-
-/* end of may need for future features */
-
-// function closeModal() {
-//     //eventTitleInput.classList.remove('error');
-//     newEventModal.style.display = 'none';
-//     newReservationModal.style.display = 'none';
-//     deleteEventModal.style.display = 'none';
-//     expandedEventsModal.style.display = 'none';
-//     tabModal.style.display = 'none';
-//     backDrop.style.display = 'none';
-//     //eventTitleInput.value = '';
-//     clicked = null;
-//     console.log('close modal called');
-//     load();
-// }
-
-// function deleteEvent() {
-//     //delete current event from storage
-//     events = events.filter(e => e.date !== clicked);
-//     localStorage.setItem('events', JSON.stringify(events));
-//     closeModal();
-// }
 
 function initEventListeners() {
     document.getElementById('js-forward-button').addEventListener('click', () => {
