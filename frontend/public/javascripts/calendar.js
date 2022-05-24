@@ -51,6 +51,8 @@ function load() {
     console.log("\n\n\nload called");
     console.log(`nav ${nav}`);
 
+
+
     if (window.matchMedia("(min-width: 768px)").matches) {
         standardScreenSettings();
     } else {
@@ -61,6 +63,7 @@ function load() {
     if (accountType === 'student') {
         document.getElementById('reservation-tab').innerText = '';
         document.getElementById('reservation-tab').disabled = true;
+        document.getElementById('book-slot-window').style.display = 'block';
     };
 
     // THESE ARE ALL CORRECT
@@ -304,7 +307,9 @@ function openExpandedEventsModal(selectedDate) {
             //add event listener for the delete button
             eventBtnCol.addEventListener('click', () => {
 
-                if (event.host_id === user_id) {
+                console.log(event.staff_id);
+
+                if (event.host_id === user_id || event.user_id === user_id) {
                     if (confirm("Are you sure you want to delete this event?")) {
                         console.log('remove event');
                         removeEvent(event);

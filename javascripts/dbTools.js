@@ -86,7 +86,6 @@ async function InsertEventInfo(title, description, location_id) {
 
 async function getUserIdByEmail(email) {
     let db = await getDatabase();
-    // return await db.get(`SELECT user_id FROM Users WHERE email = ?`, [email]);
     return await db.get(`SELECT user_id FROM Users WHERE email = ?`, [email]);
 };
 

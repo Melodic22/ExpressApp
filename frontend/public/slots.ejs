@@ -14,13 +14,11 @@
         <title>MyCalendarChum</title>
     </head>
 
-    <body>
+    <body onload="checkIfSlotsEmpty()">
         
         <div class="topnav" id="myTopnav">
             <a href="calendar">Personal Calendar</a>
             <a href="slots" class="active">Book a Slot</a>
-            <a href="outlook">Outlook Calendar</a>
-            <a href="outlooks">My Outlook Calendar</a>
             <a href="logout" id="top-right-nav-2">Sign out</a>
             <a id="top-right-nav">Welcome <%= username %></a>
             
@@ -45,34 +43,20 @@
 
    
        
-        
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                      <th scope="col">Staff Member</th>
-                      <th scope="col">Available Slots</th>
-                    </tr>
-                  </thead>
-                  
-                  <tbody id="js-table-body">
-                    <!-- <tr>
-                      <th scope="row">1</th>
-                      <td>Mark</td>
+          <div class="table-responsive">
+              <table class="table table-hover">
+                  <thead>
+                      <tr>
+                        <th scope="col">Staff Member</th>
+                        <th scope="col">Available Slots</th>
+                      </tr>
+                    </thead>
+                    
+                    <tbody id="js-table-body">
 
-                    </tr>
-                    <tr>
-                      <th scope="row">2</th>
-                      <td>Jacob</td>
-
-                    </tr>
-                    <tr>
-                      <th scope="row">3</th>
-                      <td>@twitter</td>
-                    </tr> -->
-                  </tbody>
-            </table>
-        </div>
+                    </tbody>
+              </table>
+          </div>
 
       
 

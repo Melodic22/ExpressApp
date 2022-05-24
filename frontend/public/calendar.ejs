@@ -20,9 +20,7 @@
         
         <div class="topnav" id="myTopnav">
             <a href="calendar" class="active">Personal Calendar</a>
-            <a href="slots" >Book a Slot</a>
-            <a href="outlook">Outlook Calendar</a>
-            <a href="outlooks">My Outlook Calendar</a>
+            <a href="slots" id="book-slot-window" style="display: none;">Book a Slot</a>
             <a href="logout" id="top-right-nav-2">Sign out</a>
             <a id="top-right-nav">Welcome <%= username %></a>
             
@@ -129,7 +127,7 @@
 
                                                     <div class="row">
                                                         <div class="col-md-12">
-                                                            <input type="text" id="event-participants-input" class="event-input" name="participants" placeholder="Participants (UEA Email)"/>
+                                                            <input type="text" id="event-participants-input" class="event-input" name="participants" placeholder="Participant emails (separated by ', ')"/>
                                                         </div>
                                                     </div>
 
@@ -137,12 +135,12 @@
                                                         <div class="col-md-6">
                                                             <label for="start">Start</label><br>
                                                             <!-- temp had to get rid of step=900 and required-->
-                                                            <input type="time" id="event-start-time-input" class="event-input" name="s" placeholder="Start Time" />
+                                                            <input type="time" id="event-start-time-input" oninput="validateTime('event', 'start')" class="event-input" name="s" placeholder="Start Time" required/>
                                                         </div>
 
                                                         <div class="col-md-6">
                                                             <label for="end">End</label><br>
-                                                            <input type="time" id="event-finish-time-input" class="event-input" name="e" placeholder="Finish Time"  />
+                                                            <input type="time" id="event-finish-time-input" oninput="validateTime('event', 'finish')" class="event-input" name="e" placeholder="Finish Time" required/>
                                                         </div>
                                                     </div>
 
@@ -179,7 +177,7 @@
                                                         </div>
 
                                                         <div class="col-sm-6 d-grid gap-2">
-                                                            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Create Event</button>
+                                                            <button type="submit" class="btn btn-primary">Create Event</button>
                                                         </div>
                                                     </div>
 
@@ -201,12 +199,25 @@
                                                     <div class="row">
                                                         <div class="col-md-6">
                                                             <label for="start">Start</label><br>
-                                                            <input type="time" id="res-start-time-input" class="event-input" name="start" placeholder="Start Time" required/>
+                                                            <input type="time" id="res-start-time-input" oninput="validateTime('res', 'start')" class="event-input" name="start" placeholder="Start Time" required/>
                                                         </div>
+
+                                                        <script>
+                                                            function validateTime(type, time) {
+                                                                let start = document.getElementById(`${type}-start-time-input`).value;
+                                                                let end = document.getElementById(`${type}-finish-time-input`).value;
+                                                                if (start.length !== 0 && end.length !== 0) {
+                                                                    if (start >= end) {
+                                                                        alert('Please enter a start time that is before the end time.');
+                                                                        document.getElementById(`${type}-${time}-time-input`).value = '';
+                                                                    };
+                                                                };
+                                                            };
+                                                        </script>
 
                                                         <div class="col-md-6">
                                                             <label for="end">End</label><br>
-                                                            <input type="time" id="res-finish-time-input" class="event-input" name="end" placeholder="Finish Time" required/>
+                                                            <input type="time" id="res-finish-time-input" oninput="validateTime('res', 'finish')" class="event-input" name="end" placeholder="Finish Time" required/>
                                                         </div>
                                                     </div>
                                                     

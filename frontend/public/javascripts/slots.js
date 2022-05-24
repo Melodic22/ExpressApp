@@ -24,6 +24,8 @@ function confirmSlotBooking(slot) {
                     if (response.status === 201) {  //request successful
                         console.log('response successful');
                         alert(`Your meeting has been confirmed. \nAn email has been sent to your email address at ${email} \nand ${slot.firstname}'s email at ${slot.email}`);
+                        //redirect to calendar 
+                        window.location.href = "http://localhost:5000/calendar" 
                     }
                 })
                 .catch((error) => {     //request not successful
@@ -31,16 +33,23 @@ function confirmSlotBooking(slot) {
                     alert('An error has occured while booking your slot');
                 });
 
-                //redirect to calendar
-                window.location.href = "http://localhost:5000/calendar";        
+                //redirect to calendar 
+                // window.location.href = "http://localhost:5000/calendar" 
     } else {
         //cancel selected
         alert(`Your meeting has been cancelled.`);
     }
-}
+};
+
+function checkIfSlotsEmpty() {
+    if (slots.length === 0) {
+        alert('There are no available slots to book right now. Please try again later.');
+    };
+};
 
 
 function showSlots(slots) {
+
 
     seenStaff = [];
 
@@ -81,6 +90,7 @@ function showSlots(slots) {
             seenStaff.push(slot.staff_id);
         }
     });
+    
 
 }
 

@@ -49,15 +49,16 @@
                    
 
                     <form class="px-3 px-sm-5 py-0 py-sm-3 py-lg-5" id="sign_up_form" action="/signup" method="POST">
-                        <input type="text" id="fname" name="firstname" placeholder="First name">
-                        <input type="text" id="lname" name="lastname" placeholder="Last name">
-                        <input type="email" id="email" name="email" placeholder="Email" autocomplete="email">
-                        <input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password" >
-                        <p>Are you a..?</p>
-                        <input type="radio" id="student" name="account_type" value="student">
+                        <input type="text" id="fname" name="firstname" placeholder="First name" required>
+                        <input type="text" id="lname" name="lastname" placeholder="Last name" required>
+                        <input type="email" id="email" name="email" placeholder="Email" autocomplete="email" required>
+                        <input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password"  required>
+                        <p>Please select whether you are a student or staff member</p>
+                        <input type="radio" class="form-check-input" id="student" name="account_type" value="student" required>
                         <label for="student">Student</label><br>
-                        <input type="radio" id="staff" name="account_type" value="staff">
+                        <input type="radio" class="form-check-input" id="staff" name="account_type" value="staff" required>
                         <label for="staff">Staff</label><br>
+                        <p id="js-login-error-message"><%= message %></p>
                         <input type="submit" value="Submit">
                     </form>
 
