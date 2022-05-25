@@ -61,6 +61,11 @@ h1, h5 {
             color: black;
         }
 
+#book-slot-window {
+    background-color: #2b6777;
+    color: white;
+}
+
     /* Hide the link that should open and close the topnav on small screens */
     .topnav .icon {
         display: none;

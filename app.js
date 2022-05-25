@@ -50,7 +50,18 @@ app.set('view engine', 'ejs');
 
 /* start of routes */
 
-app.get('/calendar', async function (req, res) {
+app.get('/about', (req, res) => {
+    if (req.session.loggedin) {
+        res.render('about', {
+            username : req.session.username,
+            accountType : req.session.type
+        });
+    } else {
+        res.redirect('/calendar');
+    }
+});
+
+app.get('/calendar', async (req, res) => {
     console.log('/calendar called');
     if (req.session.loggedin) {
     
@@ -720,7 +731,8 @@ app.get('/slots', async (req, res) => {
         res.render('slots', {
             username : req.session.username,
             email : req.session.email,
-            slots : slots
+            slots : slots,
+            accountType : req.session.type
         });
     } else {
         res.redirect('/calendar');

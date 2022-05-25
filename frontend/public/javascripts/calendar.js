@@ -63,7 +63,12 @@ function load() {
     if (accountType === 'student') {
         document.getElementById('reservation-tab').innerText = '';
         document.getElementById('reservation-tab').disabled = true;
-        document.getElementById('book-slot-window').style.display = 'block';
+        document.getElementById('book-slot-window').href="slots";
+    } else if (accountType === 'staff') {   //disable book a slot page if user is a staff account
+        document.getElementById('book-slot-window').addEventListener('click', () => {
+            console.log('clicked');
+            alert('Sorry, slots can only be booked by students.');
+        });
     };
 
     // THESE ARE ALL CORRECT

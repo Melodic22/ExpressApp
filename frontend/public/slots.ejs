@@ -18,7 +18,8 @@
         
         <div class="topnav" id="myTopnav">
             <a href="calendar">Personal Calendar</a>
-            <a href="slots" class="active">Book a Slot</a>
+            <a href="javascript:void(0)" id="book-slot-window" class="active">Book a Slot</a>
+            <a href="about">About</a>
             <a href="logout" id="top-right-nav-2">Sign out</a>
             <a id="top-right-nav">Welcome <%= username %></a>
             
@@ -39,6 +40,16 @@
         <script>
             let slots = <%- JSON.stringify(slots) %>;
             let email = <%- JSON.stringify(email) %>;
+
+            let accountType = <%- JSON.stringify(accountType) %>;
+
+            if (accountType === 'student') {
+                document.getElementById('book-slot-window').href = "slots";
+            } else if (accountType === 'staff') {
+                document.getElementById('book-slot-window').addEventListener('click', () => {
+                    alert('Sorry, slots can only be booked by students.');
+                });
+            };
         </script>
 
    
