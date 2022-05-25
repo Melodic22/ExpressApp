@@ -21,7 +21,7 @@ h1, h5 {
 }
 
 /* 2 ids instead of 1 class because float wouldn't work */
-#top-right-nav, #top-right-nav-2 {
+#top-right-nav, #top-right-nav-2, #delete-account-btn {
     float: right;
     color: white;
 }
@@ -30,7 +30,9 @@ h1, h5 {
         color: black;
     }
 
-
+#delete-account-btn:hover {
+    color: black;
+}
 
 /* Add a black background color to the top navigation */
 .topnav {
@@ -64,6 +66,11 @@ h1, h5 {
 #book-slot-window {
     background-color: #2b6777;
     color: white;
+}
+
+#book-slot-window:hover {
+    background-color: #ddd;
+    color: black;
 }
 
     /* Hide the link that should open and close the topnav on small screens */
@@ -102,28 +109,6 @@ h1, h5 {
         }
 }
 
-
-    
-
-
-/* JAVASCRIPT CALENDAR TUT CSS */
-
-
-
-
-/*
-button {
-    width: 75px;
-    cursor: pointer;
-    box-shadow: 0px 0px 2px gray;
-    border: none;
-    outline: none;
-    padding: 5px;
-    border-radius: 5px;
-    color: white;
-}
-    */
-
 #header {
     padding: 10px;
     
@@ -143,8 +128,7 @@ button {
 #weekdays {
     width: 100%;
     display: flex;
-    color: #247BA0;
-    /* border: 5px solid blue; */
+    color: black;
     text-align: center;
 }
 
@@ -152,7 +136,6 @@ button {
         width: 14.2%;
         padding: 10px;
         margin: 0px;
-        /* border: 5px solid green; */
     }
 
 #calendar {
@@ -160,13 +143,12 @@ button {
     margin: auto;
     display: flex;
     flex-wrap: wrap;
-    /* border: 5px solid yellow; */
 }
 
 .day {
     width: 14.2%;
     padding: 10px;
-    height: 200px;
+    height: 180px;
     cursor: pointer;
     box-sizing: border-box;
     background-color: white;
@@ -177,8 +159,6 @@ button {
     justify-content: space-between;
     border: 1px solid grey;
 }
-
-/* my code */
 
 /* when screen is less than 600px wide */
 @media screen and (max-width: 600px) {
@@ -193,14 +173,13 @@ button {
         margin: 0px;
     }
 }
-/* end of my code */
 
     .day:hover {
         background-color: #e8faed;
     }
 
     .day + #currentDay {
-        background-color: #c8d8e4;
+        background-color: #d0f9ff;
     }
 
 .event, .slot, .confirmedSlot, .participantEvent, .more-button {
@@ -319,7 +298,6 @@ button {
     font-family: sans-serif;
 }
 
-/* mine */
 .event-input, .reservation-input {
     padding: 10px;
     width: 100%;
@@ -333,7 +311,6 @@ button {
     .event-input.error {
         border: 2px solid red; 
     }
-/* end of mine */
 
 #cancelButton {
     background-color: #d8caca;
@@ -406,10 +383,10 @@ button {
 }
 
 .tabcontent {
-    animation: fadeEffect 0.2s; /* Fading effect takes 1 second */
+    animation: fadeEffect 0.2s; /* fading effect takes 1 second */
   }
   
-  /* Go from zero to full opacity */
+  /* go from zero to full opacity */
   @keyframes fadeEffect {
     from {opacity: 0;}
     to {opacity: 1;}

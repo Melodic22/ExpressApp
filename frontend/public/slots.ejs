@@ -21,17 +21,15 @@
             <a href="javascript:void(0)" id="book-slot-window" class="active">Book a Slot</a>
             <a href="about">About</a>
             <a href="logout" id="top-right-nav-2">Sign out</a>
+            <a id="delete-account-btn">Delete Account</a>
             <a id="top-right-nav">Welcome <%= username %></a>
+
             
             <a href="javascript:void(0);" class="icon" onclick="toggleNav()">
                 <i class="fa fa-bars"></i>
             </a>
         </div>
         
-        
-
-        <!-- <% var test = 101; %>
-        <h2><%= test %></h2> -->
 
        
 
@@ -40,6 +38,7 @@
         <script>
             let slots = <%- JSON.stringify(slots) %>;
             let email = <%- JSON.stringify(email) %>;
+            let user_id = <%- JSON.stringify(user_id) %>;
 
             let accountType = <%- JSON.stringify(accountType) %>;
 

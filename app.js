@@ -15,17 +15,8 @@ const validation = require('./javascripts/validation');
 // Creating express object
 const app = express();
 
-//const db = new sqlite3.Database('./db.sqlite3');
 const db = dbTools.getDatabase();
-//enable foreign keys
 
-async function populateDatabase() {
-
-    await dbTools.populate();
-};
-//populateDatabase();
-
-//app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static("frontend/public"));
 
 app.use(session({
@@ -54,7 +45,8 @@ app.get('/about', (req, res) => {
     if (req.session.loggedin) {
         res.render('about', {
             username : req.session.username,
-            accountType : req.session.type
+            accountType : req.session.type,
+            user_id : req.session.user_id
         });
     } else {
         res.redirect('/calendar');
@@ -74,11 +66,14 @@ app.get('/calendar', async (req, res) => {
         req.session.user_id = user_id.user_id;
 
         let bookedEvents = await dbTools.getBookedEventsByUserId(req.session.user_id);
-        //console.log(bookedEvents);
+        // console.log(bookedEvents);
+        // console.log('\n\n\n');
         let participantEvents = await dbTools.getBookedEventsByParticipantId(req.session.user_id);
-        //console.log(participantEvents);
+        // console.log(participantEvents);
+        // console.log('\n\n\n');
         let bookedSlots = await dbTools.getBookedSlotsByUserId(req.session.user_id);
-        //console.log(bookedSlots);
+        // console.log(bookedSlots);
+        // console.log('\n\n\n');
         let allEvents = bookedEvents.concat(bookedSlots);
         allEvents = allEvents.concat(participantEvents);
         //sort all events in order of time_start so they can be displayed in order
@@ -443,21 +438,24 @@ app.post('/calendar/create-event', async (req, res) => {
     
             for (let i = 0; i < participantsList.length; i++) {
                 console.log(participantsList[i]);
-                const participant = await dbTools.getUserByEmail(participantsList[i]);
-                await dbTools.inviteParticipant(newEvent.lastID, participant.user_id);
-    
-                //email sent to pending participant
-                const email = await sendMail.emailConstructor(req.session.username, req.session.lastname, participant.firstname, participant.lastname, newEvent.lastID);
-    
-                sendMail.sendMail(email, participantsList[i]);
-                //sendMail.sendMail(email, 'mattreid22@btopenworld.com');
-    
+
+                //validate email, ignore the email if invalid
+                if (validation.validateEmail(participantsList[i]) === true) {
+                    const participant = await dbTools.getUserByEmail(participantsList[i]);
+                    await dbTools.inviteParticipant(newEvent.lastID, participant.user_id);
+        
+                    //email sent to pending participant
+                    const email = await sendMail.emailConstructor(req.session.username, req.session.lastname, participant.firstname, participant.lastname, newEvent.lastID);
+        
+                    sendMail.sendMail(email, participantsList[i]);
+                    //sendMail.sendMail(email, 'mattreid22@btopenworld.com');
+                }
+                
             };
     
         }
     
         res.redirect('/calendar'); 
-        //res.status(201).end();
     }
     
 
@@ -531,40 +529,9 @@ app.post('/confirm-attendance', async (req, res) => {
         });
         res.end();     
     };
-})
-
-
-
-                
-app.post('/calendar/edit-event', (req, res) => {
-    console.log('calendar/edit-event POST called');
-
-    //take form data from create event
-    let title = req.body.title;
-    let description = req.body.description;
-    //temp loc
-    let location = req.body.location;
-    let participants = req.body.participants;
-    let sTime = req.body.start;
-    let fTime = req.body.end;
-    let event_id = req.body.eventid;
-    
-    //not registering title from form
-    console.log(title);
-    console.log(description);
-    //temp loc
-    console.log(location);
-    console.log(participants);
-    console.log(sTime);
-    console.log(fTime);
-    console.log(req.session.user_id);
-
-    db.run("UPDATE events SET location_id=? , participants=?, title=?, description=?, start_time=?, end_time=? WHERE event_id=?", [location, participants, title, description, sTime, fTime, event_id]);
-
-    res.redirect('/calendar');
 });
 
-//TODO:
+
 app.delete('/calendar/reservations/:id', async (req, res) => {
     console.log(`slot_id to delete ${req.params.id}`);
     //remove record from db
@@ -593,6 +560,24 @@ app.delete('/calendar/events/:id', async (req, res) => {
     res.end();
 
     
+});
+
+app.delete('/delete-account/:id', async (req, res) => {
+    console.log(`user_id to delete ${req.params.id}`);
+    
+    if (req.session.type === 'student') {
+        var deleted = await dbTools.deleteStudentAccount(req.params.id);
+    } else {
+        var deleted = await dbTools.deleteStaffAccount(req.params.id);
+    }
+
+    if (deleted === true) {
+        req.session.destroy();
+        res.status(204).send();
+    } else {
+        res.status(500).send();
+    }
+    res.end();
 });
 
 app.post('/calendar/create-reservation', async (req, res) => {
@@ -732,7 +717,8 @@ app.get('/slots', async (req, res) => {
             username : req.session.username,
             email : req.session.email,
             slots : slots,
-            accountType : req.session.type
+            accountType : req.session.type,
+            user_id : req.session.user_id
         });
     } else {
         res.redirect('/calendar');

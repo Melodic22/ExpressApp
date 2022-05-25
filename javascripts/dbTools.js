@@ -11,71 +11,8 @@ async function getDatabase() {
         filename: 'db.sqlite3',
         driver: sqlite3.Database})
     let db = await dbPromise
-    // await db.run("PRAGMA foreign_keys = ON");
     await db.migrate()
     return db;
-}
-
-//function to populate the database with dummy entries 
-async function populate() {
-    //add users
-    let salt = crypto.pseudoRandomBytes(24).toString('hex');
-    let hash = await encryption.hashPassword('passpasspass', salt)
-    let newUser = await createUser('Bob', 'Smith', 'bob.smith63@outlook.com', hash, salt);  //user_id = 1
-    await createStudent(1);
-
-    salt = crypto.pseudoRandomBytes(24).toString('hex');
-    hash = await encryption.hashPassword('passpasspass', salt)
-    newUser = await createUser('Megan', 'Adams', 'megan.adams25@outlook.com', hash, salt);  //user_id = 2
-    await createStudent(2);
-
-    salt = crypto.pseudoRandomBytes(24).toString('hex');
-    hash = await encryption.hashPassword('passpasspass', salt)
-    newUser = await createUser('Robert', 'James', 'robert.james331@outlook.com', hash, salt);  //user_id = 3
-    await createStaff(3);
-
-    //add some addresses                                                                                  (UEA) //address_id = 1
-    await addAddress('3 Langton Close', null, null, 'Norwich', 'Norfolk', 'NR5 8RU', 'United Kingdom'); //address_id = 2
-    await addAddress('75 Imaginary Road', 'Cottenham', null, 'Norwich', 'Norfolk', 'NR3 7TU', 'United Kingdom'); //address_id = 3
-
-    //add some locations                                   (Online) //location_id = 1
-    await createLocation('UEA Campus', 'SCI', 2.37, 1);       //location_id = 2
-    await createLocation('UEA Campus', 'SCI', 2.38, 1);       //location_id = 3
-    await createLocation('UEA Campus', 'NewSci', 2.1, 1);     //location_id = 4
-    await createLocation('My House', null, null, 2);        //location_id = 5
-    await createLocation('Community Centre', null, null, 3);//location_id = 6
-
-    //add online events //date in form dd/mm/yyyy
-    await createEvent('DSS Lecture', 'DSS Lecture', 1, '18/05/2022', '12:00', '13:00', 1);      //event_id = 1
-
-    //await createEvent('Meeting with friend', 'A meeting with Megan', 4, '18/05/2022', '15:00', '16:00', 1);      //event_id = 2
-    //await dummy_addParticipant(1, 2);
-
-    await createEvent('Work Meeting', 'Meeting to discuss next steps', 3, '20/05/2022', '15:30', '16:00', 2);      //event_id = 3
-    await dummy_addParticipant(2, 1);
-
-    await createReservation('15/05/2022', '12:00', '12:30', 1, 3);  //slot_id = 1   //time_id = 4
-    let newEvent = await createEventFromReservation('Advisor Meeting', `Meeting between student and advisor`, 1, 4, 3);
-    await addParticipant(newEvent.lastID, 1);
-    await removeReservationById(1);
-    //create res with bob
-
-    await createReservation('18/05/2022', '12:00', '12:30', 1, 3);  //slot_id = 1   //time_id = 5
-    newEvent = await createEventFromReservation('Advisor Meeting', `Meeting between student and advisor`, 1, 5, 3);
-    await addParticipant(newEvent.lastID, 1);
-    await removeReservationById(1);
-
-
-    /*
-        await createReservation('30/04/2022', '16:45', '17:45', 1, 1);
-    await createReservation('29/04/2022', '15:45', '17:45', 1, 1);
-    await createReservation('28/04/2022', '15:45', '17:45', 1, 2);
-    await createReservation('27/04/2022', '16:45', '17:45', 1, 2);
-    await createReservation('26/04/2022', '14:45', '16:00', 1, 2);
-
-    //duplicate time entry, slot_id:1 and slot_id:6 should both reference time_id 1
-    await createReservation('30/04/2022', '16:45', '17:45', 1, 1);
-    */
 }
 
 //helper functions
@@ -93,25 +30,6 @@ async function getUserByEmail(email) {
     const db = await getDatabase();
     return await db.get(`SELECT * FROM Users WHERE email = ?`, [email]);
 };
-
-// async function getBookedEventsByUserId(host_id) {
-//     let db = await getDatabase();
-//     return await db.all(`SELECT * \
-//                         FROM BookedEvents as b \
-//                             INNER JOIN TimeInfo as t \
-//                                 ON b.time_id = t.time_id \
-//                             INNER JOIN EventInfo as e \
-//                                 ON e.event_id = b.event_id \
-//                             LEFT OUTER JOIN Participations as p \
-//                                 ON b.event_id = p.event_id \
-//                             LEFT OUTER JOIN ParticipationType as pt \
-//                                 ON pt.participation_type_id = p.participation_type_id \
-//                             LEFT OUTER JOIN Locations as l \
-//                                 ON e.location_id = l.location_id \
-//                             LEFT OUTER JOIN Addresses as a \
-//                                 ON l.address_id = a.address_id \
-//                             WHERE b.host_id = ?`, [host_id]);
-// };
 
 async function getBookedEventByEventId(event_id) {
     let db = await getDatabase();
@@ -138,17 +56,12 @@ async function getBookedEventByEventId(event_id) {
 async function getBookedEventsByUserId(host_id) {
     const db = await getDatabase();
     return await db.all(`SELECT b.event_id, b.host_id, b.time_id, t.date, t.time_start, t.time_finish, e.title, e.description, e.location_id, \
-                            l.location_name, l.location_building, l.location_room, l.address_id, a.line_1, a.line_2, a.line_3, a.city, a.county, a.postcode, a.country, \
-                            p.participant_id, pt.participation_type_id, pt.participation_type_name \
+                            l.location_name, l.location_building, l.location_room, l.address_id, a.line_1, a.line_2, a.line_3, a.city, a.county, a.postcode, a.country \
                         FROM BookedEvents as b \
                             INNER JOIN TimeInfo as t \
                                 ON b.time_id = t.time_id \
                             INNER JOIN EventInfo as e \
                                 ON e.event_id = b.event_id \
-                            LEFT OUTER JOIN Participations as p \
-                                ON b.event_id = p.event_id \
-                            LEFT OUTER JOIN ParticipationType as pt \
-                                ON pt.participation_type_id = p.participation_type_id \
                             LEFT OUTER JOIN Locations as l \
                                 ON e.location_id = l.location_id \
                             LEFT OUTER JOIN Addresses as a \
@@ -319,14 +232,7 @@ async function inviteParticipant(event_id, participant_id) {
 async function updateParticipantType(event_id, participant_id, participation_type_id) {
     const db = await getDatabase();
     return await db.run(`UPDATE Participations SET participation_type_id = ? WHERE event_id = ? and participant_id = ?`, [participation_type_id, event_id, participant_id]);
-}
-
-//for changing an invited participant to a confirmed participant
-// async function confirmParticipant(event_id, participant_id) {
-//     const db = await getDatabase();
-//     //alter statement needed
-//     //return await db.run(`INSERT INTO Participations (event_id, participant_id, participation_type_id) VALUES (?, ?, ?)`, [event_id, participant_id, 2]);
-// };
+};
 
 //for confirming a participant who has booked a slot with a staff member
 async function addParticipant(event_id, participant_id) {
@@ -485,6 +391,28 @@ async function getReservationById(slot_id) {
                             WHERE bs.slot_id = ?`, [slot_id]);
 }
 
+async function deleteStudentAccount(user_id) {
+    const db = await getDatabase();
+    await db.run(`DELETE FROM Students WHERE user_id = ?`, [user_id]);
+    await db.run(`DELETE FROM BookedEvents WHERE host_id = ?`, [user_id]);
+    await db.run(`DELETE FROM Participations WHERE participant_id = ?`, [user_id]);
+    await db.run(`DELETE FROM Users WHERE user_id = ?`, [user_id]);
+
+    return true;
+}
+
+async function deleteStaffAccount(user_id) {
+    const db = await getDatabase();
+    const staff = await db.get(`SELECT * FROM Staff WHERE user_id = ?`, [user_id]);
+    await db.run(`DELETE FROM Staff WHERE user_id = ?`, [user_id]);
+    await db.run(`DELETE FROM BookedEvents WHERE host_id = ?`, [user_id]);
+    await db.run(`DELETE FROM Participations WHERE participant_id = ?`, [user_id]);
+    await db.run(`DELETE FROM BookingSlots WHERE staff_id = ?`, [staff.staff_id]);
+    await db.run(`DELETE FROM Users WHERE user_id = ?`, [user_id]);
+
+    return true;
+}
+
 
 
 module.exports = {
@@ -493,5 +421,5 @@ module.exports = {
     getLocationByUEARoom, createLocation, getAddress, addAddress, getStaffByUserId, getAllReservations, getReservationById,
     addParticipant, removeReservationById, createEventFromReservation, deleteReservation, deleteEvent, getLocationbyLocNameAddress,
     getBookedEventsByParticipantId, getUserByEmail, getStaffByEmail, getStudentByEmail, getBookedEventByEventId, updateParticipantType,
-    populate
+    deleteStudentAccount, deleteStaffAccount
 }

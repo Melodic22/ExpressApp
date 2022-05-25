@@ -33,8 +33,6 @@ function confirmSlotBooking(slot) {
                     alert('An error has occured while booking your slot');
                 });
 
-                //redirect to calendar 
-                // window.location.href = "http://localhost:5000/calendar" 
     } else {
         //cancel selected
         alert(`Your meeting has been cancelled.`);
@@ -94,7 +92,37 @@ function showSlots(slots) {
 
 }
 
-/* Toggle between adding and removing the "responsive" class to topnav when the user clicks on the icon */
+function initEventListeners() {
+
+    document.getElementById('delete-account-btn').addEventListener('click', () => {
+        if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+            //send POST request to backend
+    
+            fetch('/delete-account/' + user_id, {
+            method: 'DELETE',
+            headers: {
+                'Accept' : 'application/json',
+                'Content-Type': 'application/json'
+            },
+            }).then(response => {
+                if (response.status === 204) {
+                    //redirect to calendar 
+                    window.location.href = "http://localhost:5000/";
+                }
+                if (response.status === 500) {
+                    alert("Oops. There was an error while deleting your account. Please try again.")
+                }
+            })
+            .catch((error) => {
+                console.log(`Error deleting at ${url}: `, error);
+            });
+    
+        }
+    })
+}
+
+
+//toggle between adding and removing the "responsive" class to topnav when the user clicks on the icon
 function toggleNav() {
     var x = document.getElementById("myTopnav");
     if (x.className === "topnav") {
@@ -103,3 +131,5 @@ function toggleNav() {
         x.className = "topnav";
     }
 }
+
+initEventListeners();

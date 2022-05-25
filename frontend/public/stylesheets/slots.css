@@ -21,7 +21,7 @@ h1, h5 {
 }
 
 /* 2 ids instead of 1 class because float wouldn't work */
-#top-right-nav, #top-right-nav-2 {
+#top-right-nav, #top-right-nav-2, #delete-account-btn {
     float: right;
     color: white;
 }
@@ -30,7 +30,9 @@ h1, h5 {
         color: black;
     }
 
-
+#delete-account-btn:hover {
+    color: black;
+}
 
 /* Add a black background color to the top navigation */
 .topnav {
@@ -97,28 +99,6 @@ h1, h5 {
         }
 }
 
-
-    
-
-
-/* JAVASCRIPT CALENDAR TUT CSS */
-
-
-
-
-/*
-button {
-    width: 75px;
-    cursor: pointer;
-    box-shadow: 0px 0px 2px gray;
-    border: none;
-    outline: none;
-    padding: 5px;
-    border-radius: 5px;
-    color: white;
-}
-    */
-
 #header {
     padding: 10px;
     
@@ -137,7 +117,6 @@ button {
 #calendar_container {
     margin: auto;
     max-width: 1800px;
-    /*border: 5px solid red;*/
 }
 
 

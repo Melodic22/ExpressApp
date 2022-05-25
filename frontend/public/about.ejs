@@ -14,13 +14,14 @@
 
     <title>MyCalendarChum</title>
 </head>
-<body>
+<body onload="initEventListeners()">
 
     <div class="topnav" id="myTopnav">
         <a href="calendar">Personal Calendar</a>
         <a href="javascript:void(0)" id="book-slot-window">Book a Slot</a>
         <a href="about" class="active">About</a>
         <a href="logout" id="top-right-nav-2">Sign out</a>
+        <a id="delete-account-btn">Delete Account</a>
         <a id="top-right-nav">Welcome <%= username %></a>
         
         <a href="javascript:void(0);" class="icon" onclick="toggleNav()">
@@ -39,6 +40,7 @@
             }
 
             let accountType = <%- JSON.stringify(accountType) %>;
+            let user_id = <%- JSON.stringify(user_id) %>;
 
             if (accountType === 'student') {
                 document.getElementById('book-slot-window').href = "slots";
@@ -47,6 +49,34 @@
                     alert('Sorry, slots can only be booked by students.');
                 });
             };
+
+            function initEventListeners() {
+                document.getElementById('delete-account-btn').addEventListener('click', () => {
+                    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                        //send POST request to backend
+
+                        fetch('/delete-account/' + user_id, {
+                        method: 'DELETE',
+                        headers: {
+                            'Accept' : 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        }).then(response => {
+                            if (response.status === 204) {
+                                //redirect to calendar 
+                                window.location.href = "http://localhost:5000/";
+                            }
+                            if (response.status === 500) {
+                                alert("Oops. There was an error while deleting your account. Please try again.")
+                            }
+                        })
+                        .catch((error) => {
+                            console.log(`Error deleting at ${url}: `, error);
+                        });
+                        
+                    }
+                })
+            }
         </script>
     </div>
 

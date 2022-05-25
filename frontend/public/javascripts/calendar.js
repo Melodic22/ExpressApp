@@ -1,7 +1,4 @@
 let nav = 0;
-//let clicked = null;
-//let events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('events')) : [];
-
 const calendar = document.getElementById('calendar');
 const newEventModal = document.getElementById('newEventModal');
 const newReservationModal = document.getElementById('newReservationModal');
@@ -131,7 +128,7 @@ function load() {
             console.log(`button display set to none`);
 
 
-            //new code
+            //loop through every event and display
             allEvents.forEach(function(event) {
 
 
@@ -146,11 +143,7 @@ function load() {
 
 
                     if (eventCount === 5) {
-                        console.log(`eventCount = 5`);
-                        // eventDiv.classList += ' compact';
-                        //create button called "x more" which loads expanded view
-                        
-                                             
+                        console.log(`eventCount = 5`);                                                    
                         console.log(`button display set to block`);
                         moreButton.innerText = `${eventCount-4} more...`;
                         moreButton.style.display = 'block';
@@ -173,7 +166,6 @@ function load() {
                         console.log(`eventCount is less than 5`);
                         if (event.title) {  //if is event (not reservation)
 
-                            //const eventDiv = document.createElement('div');
                             if (event.title === 'Advisor Meeting') {
                                 eventDiv.classList.add('confirmedSlot');
                             } else {
@@ -188,7 +180,6 @@ function load() {
     
                         if (event.slot_id) {    //if is a reservation
     
-                            //const eventDiv = document.createElement('div');
                             eventDiv.classList.add('slot');
                             eventDiv.innerText = `Reserved Slot: ${event.time_start} to ${event.time_finish}`;
                             daySquare.appendChild(eventDiv);
@@ -253,16 +244,6 @@ function openExpandedEventsModal(selectedDate) {
             // eventCol.classList.add('bs-event-expanded');
             eventRow.append(eventCol);
 
-            /* add back in if I need an edit button */
-            // const eventBtnEditCol = document.createElement('button');
-            // eventBtnEditCol.classList.add('col-2');
-            // eventBtnEditCol.classList.add('btn');
-            // eventBtnEditCol.classList.add('btn-success');
-            // eventBtnEditCol.setAttribute('id', 'event-btn-edit');
-            // eventBtnEditCol.innerText = 'Edit';
-            // eventRow.append(eventBtnEditCol);
-            /* end of edit button code */
-
             const eventBtnCol = document.createElement('button');
             eventBtnCol.classList.add('col-sm-2');
             eventBtnCol.classList.add('btn');
@@ -277,7 +258,6 @@ function openExpandedEventsModal(selectedDate) {
                 //display reservation details
                 var eventSummary = `Reserved Slot: ${event.time_start}-${event.time_finish}`;
                 
-                //TODO: change participants_id to find the name of the participant and display whether they've accepted
 
             } else if (event.event_id) {
 
@@ -334,25 +314,16 @@ function openExpandedEventsModal(selectedDate) {
             document.getElementById('js-new-reservation-title').innerText = `Create reservation for ${selectedDate}`;
             document.getElementById('slot-date-input').value = selectedDate;
 
-            
-            
-
+            //display event details
             eventCol.innerText = eventSummary;
 
-            //display reservation details
+            
             
         }
     });
 
     //if there are events for the current day, show the expanded view modal
     if (events) {
-        //const heading = document.createElement('h2').innerText = `Events for ${selectedDate}`;
-        // expandedEventsModal.prepend(heading);
-
-        // expandedEventsModal.style.display = 'block';
-        // backDrop.style.display = 'block';
-
-        //bootstrap
         
         const expandedViewModal = new bootstrap.Modal(document.getElementById('expandedViewModal'), {});
         document.getElementById('expandedViewModalLabel').innerText = `Events for ${selectedDate}`;
@@ -360,15 +331,8 @@ function openExpandedEventsModal(selectedDate) {
 
     } else {    //if no events for current day then open new event modal
 
-        //ACTUAL
-        //openNewEventModal(selectedDate);
-
         //show bootstrap new event and reservation modals and update js elements
-
         openCreateModal(selectedDate);
-
-
-
     }
 
 }
@@ -412,8 +376,7 @@ function removeEvent(event) {
     .catch((error) => {
         console.log(`Error deleting at ${url}: `, error);
     });
-    
-    
+     
 };
 
 
@@ -426,10 +389,6 @@ function initEventListeners() {
         nav--;
         load();
     });
-    // document.getElementById('cancelButton').addEventListener('click', closeModal);
-    // document.getElementById('cancelButton2').addEventListener('click', closeModal);
-    //document.getElementById('deleteButton').addEventListener('click', deleteEvent);
-    // backDrop.addEventListener('click', closeModal);
 
     //event listener for resizing of screen
     window.addEventListener("resize", function() {
@@ -439,9 +398,34 @@ function initEventListeners() {
         smallScreenSettings();
         }
     });
+
+    document.getElementById('delete-account-btn').addEventListener('click', () => {
+        if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+            //send POST request to backend
+
+            fetch('/delete-account/' + user_id, {
+            method: 'DELETE',
+            headers: {
+                'Accept' : 'application/json',
+                'Content-Type': 'application/json'
+            },
+            }).then(response => {
+                if (response.status === 204) {
+                    //redirect to calendar 
+                    window.location.href = "http://localhost:5000/";
+                }
+                if (response.status === 500) {
+                    alert("Oops. There was an error while deleting your account. Please try again.")
+                }
+            })
+            .catch((error) => {
+                console.log(`Error deleting at ${url}: `, error);
+            });
+        }
+    })
 }
 
-/* Toggle between adding and removing the "responsive" class to topnav when the user clicks on the icon */
+//toggle between adding and removing the "responsive" class to topnav when the user clicks on the icon
 function toggleNav() {
     var x = document.getElementById("myTopnav");
     if (x.className === "topnav") {
